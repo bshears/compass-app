@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Compass</string>
+    <string name="title_activity_main">Compass</string>
+
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="value">%1$s: %2$s </string>
+    <string name="calibration_info">Calibrate the magnetic sensor ('8' digit pattern)</string>
+
+</resources>
