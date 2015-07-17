@@ -15,8 +15,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends Activity implements SensorEventListener {
 
-    private static final float ALPHA = 0.05f;
-    private static final int NUMBER_OF_MEASURMENTS = 5;
+    private static final float ALPHA = 0.1f;
+    private static final int NUMBER_OF_MEASUREMENTS = 5;
     private ImageView mPointer;
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
@@ -29,7 +29,7 @@ public class MainActivity extends Activity implements SensorEventListener {
     private float[] mOrientation = new float[3];
     private float mCurrentDegree = 0f;
     private int measurementCounter = 0;
-    private ArrayList measurments = new ArrayList();
+    private ArrayList<Float> measurements = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,10 +67,10 @@ public class MainActivity extends Activity implements SensorEventListener {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor == mAccelerometer) {
-            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+            mLastAccelerometer = applyLowPassFilter(event.values.clone(), mLastAccelerometer.clone());
             mLastAccelerometerSet = true;
         } else if (event.sensor == mMagnetometer) {
-            System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
+            mLastMagnetometer = applyLowPassFilter(event.values.clone(), mLastMagnetometer.clone());
             mLastMagnetometerSet = true;
         }
 
@@ -81,10 +81,10 @@ public class MainActivity extends Activity implements SensorEventListener {
 
             float azimuthInDegrees = (float) (Math.toDegrees(azimuthInRadians) + 360) % 360;
             azimuthInDegrees = Math.round(azimuthInDegrees);
-            measurments.add(measurementCounter, azimuthInDegrees);
+            measurements.add(measurementCounter, azimuthInDegrees);
 
-            if (measurementCounter == NUMBER_OF_MEASURMENTS) {
-                float out = getMeasurmentAverage(NUMBER_OF_MEASURMENTS, measurments);
+            if (measurementCounter == NUMBER_OF_MEASUREMENTS) {
+                float out = getMeasurementAverage(NUMBER_OF_MEASUREMENTS, measurements);
                 animatePointer(out);
                 mCurrentDegree = -out;
                 measurementCounter = 0;
@@ -94,10 +94,10 @@ public class MainActivity extends Activity implements SensorEventListener {
         }
     }
 
-    private void animatePointer(float measurment) {
+    private void animatePointer(float measurement) {
         RotateAnimation ra = new RotateAnimation(
                 mCurrentDegree,
-                -measurment,
+                -measurement,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF,
                 0.5f);
@@ -108,7 +108,7 @@ public class MainActivity extends Activity implements SensorEventListener {
         mPointer.startAnimation(ra);
     }
 
-    private float getMeasurmentAverage(int measurementsNumber, ArrayList arrayData) {
+    private float getMeasurementAverage(int measurementsNumber, ArrayList arrayData) {
         float output = 0f;
 
         for (int i = 0; i < measurementsNumber; i++) {
