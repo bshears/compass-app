@@ -24,7 +24,7 @@
         android:orientation="horizontal">
 
         <EditText
-            android:id="@+id/latitude"
+            android:id="@+id/latitudeMainActivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -35,7 +35,7 @@
             android:singleLine="true" />
 
         <EditText
-            android:id="@+id/longitude"
+            android:id="@+id/longitudeMainActivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
