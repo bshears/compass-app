@@ -1,57 +1,46 @@
 package mariuszbaleczny.compass;
 
 import android.app.Activity;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-public class MainActivity extends Activity implements SensorEventListener {
+public class MainActivity extends Activity implements CompassToLocationProvider.ChangeEventListener {
 
-    private ImageView mPointer;
-    private SensorManager mSensorManager;
-    private Sensor mOrientationSensor;
-    private float mCurrentDegree = 0f;
-    private TextView declinationTextView;
-    private float degree;
+    private static final int NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA = 3;
+    private CompassToLocationProvider compassToLocationProvider;
+
+    public ImageView compassPointerView;
+    private double currentAngle = 0d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        compassPointerView = (ImageView) findViewById(R.id.arrowPointer);
 
-        mOrientationSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION);
-
-        mPointer = (ImageView) findViewById(R.id.arrowPointer);
-        declinationTextView = (TextView) findViewById(R.id.declinationTextView);
+        compassToLocationProvider = new CompassToLocationProvider(this,
+                NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA);
+        compassToLocationProvider.setChangeEventListener(this);
     }
 
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(this, mOrientationSensor, SensorManager.SENSOR_DELAY_GAME);
-        Toast.makeText(this, getString(R.string.calibration_info), Toast.LENGTH_SHORT).show();
+        compassToLocationProvider.start();
     }
 
     protected void onPause() {
         super.onPause();
-        mSensorManager.unregisterListener(this, mOrientationSensor);
+        compassToLocationProvider.stop();
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        degree = Math.round(event.values[0]);
-        declinationTextView.setText(String.valueOf(degree));
-
+    private void animatePointer(double angle) {
         RotateAnimation ra = new RotateAnimation(
-                mCurrentDegree,
-                -degree,
+                (float) currentAngle,
+                (float) -angle,
                 Animation.RELATIVE_TO_SELF, 0.5f,
                 Animation.RELATIVE_TO_SELF,
                 0.5f);
@@ -59,12 +48,12 @@ public class MainActivity extends Activity implements SensorEventListener {
         ra.setDuration(210);
         ra.setFillAfter(true);
 
-        mPointer.startAnimation(ra);
-        mCurrentDegree = -degree;
+        compassPointerView.startAnimation(ra);
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onCompassToLocationChange(double azimuth) {
+        animatePointer(azimuth);
+        currentAngle = -azimuth;
     }
-
 }

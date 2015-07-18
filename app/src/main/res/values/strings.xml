@@ -4,7 +4,7 @@
 
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="value">%1$s: %2$s </string>
-    <string name="calibration_info">Calibrate the magnetic sensor ('8' digit pattern)</string>
+    <string name="calibration_info">Calibrate the magnetic sensor (digit 8 pattern)</string>
+    <string name="accuracy_info">Turn On Location Services for better accuracy!</string>
 
 </resources>
