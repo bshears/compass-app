@@ -30,6 +30,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private Sensor mMagnetometer;
 
     private Location myLocation = new Location(LOCATION_PROVIDER);
+    private Location targetLocation;
     private GeomagneticField geomagneticField;
 
     private ArrayList<Float> measurements = new ArrayList<>();
@@ -65,6 +66,16 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         this.changeEventListener = changeEventListener;
     }
 
+    public void setTargetLocationCoordinates(double latitude, double longitude) {
+        targetLocation = new Location(LOCATION_PROVIDER);
+        targetLocation.setLatitude(latitude);
+        targetLocation.setLongitude(longitude);
+    }
+
+    public void resetTargetLocation() {
+        targetLocation = null;
+    }
+
     public void start() {
         sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
         sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
@@ -80,7 +91,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             }
         }
 
-        if(infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
+        if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
             infoToast = Toast.makeText(this.context, this.context.getString(R.string.calibration_info),
                     Toast.LENGTH_SHORT);
             infoToast.show();
@@ -132,7 +143,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(TAG, "Location Services OFF");
-        if(infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
+        if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
             infoToast = Toast.makeText(context, context.getString(R.string.accuracy_info),
                     Toast.LENGTH_SHORT);
             infoToast.show();
@@ -165,6 +176,12 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
                 if (geomagneticField != null) {
                     azimuth = azimuth + geomagneticField.getDeclination();
+
+                    if (targetLocation != null) {
+                        float bearing = myLocation.bearingTo(targetLocation);
+                        azimuth = azimuth - bearing;
+                    }
+
                     changeEventListener.onCompassToLocationChange(azimuth);
                 } else {
                     azimuth = azimuthInDegrees;
