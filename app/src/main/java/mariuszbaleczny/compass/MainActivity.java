@@ -30,7 +30,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (s.length() != 0) {
+            if (!isEmptyOrDash(s)) {
                 targetLatitude = Double.parseDouble(s.toString());
                 isTargetLatitude = true;
             } else {
@@ -54,7 +54,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (s.length() != 0) {
+            if (!isEmptyOrDash(s)) {
                 targetLongitude = Double.parseDouble(s.toString());
                 isTargetLongitude = true;
             } else {
@@ -111,6 +111,10 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         ra.setFillAfter(true);
 
         compassPointerView.startAnimation(ra);
+    }
+
+    private boolean isEmptyOrDash(CharSequence s){
+        return (s.length() == 0 & s.toString().equals("-"));
     }
 
     @Override

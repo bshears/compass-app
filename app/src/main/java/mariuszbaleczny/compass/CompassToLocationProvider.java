@@ -166,7 +166,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             SensorManager.getOrientation(mR, mOrientation);
             float azimuthInRadians = mOrientation[0];
 
-            float azimuthInDegrees = (float) (Math.toDegrees(azimuthInRadians) % 360);
+            float azimuthInDegrees = (float) ((Math.toDegrees(azimuthInRadians) + 360f) % 360f);
             azimuthInDegrees = Math.round(azimuthInDegrees);
 
             measurements.add(measurementCounter, azimuthInDegrees);
