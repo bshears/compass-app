@@ -6,6 +6,8 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -14,7 +16,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class CompassToLocationProvider implements SensorEventListener, LocationListener {
 
@@ -70,6 +75,17 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         targetLocation = new Location(LOCATION_PROVIDER);
         targetLocation.setLatitude(latitude);
         targetLocation.setLongitude(longitude);
+
+        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+        try {
+            List<Address> addressList = geocoder.getFromLocation(targetLocation.getLatitude(), targetLocation.getLongitude(), 1);
+            if (!addressList.isEmpty()) {
+                Address address = addressList.get(0);
+                changeEventListener.onLocationStateChange(address);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void resetTargetLocation() {
@@ -202,5 +218,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     public interface ChangeEventListener {
         void onCompassToLocationChange(double azimuth);
+
+        void onLocationStateChange(Address address);
     }
 }
