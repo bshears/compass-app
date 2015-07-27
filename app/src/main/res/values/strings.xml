@@ -5,7 +5,11 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="calibration_info">Calibrate the magnetic sensor (figure 8 pattern)</string>
+    <string name="compass_not_present">Your device doesn\'t have compass sensor!</string>
     <string name="accuracy_info">Turn On Location Services for better accuracy!</string>
+    <string name="location_services_off">Location Services are disabled</string>
+    <string name="go_to_location_services">Go to Location Settings</string>
+    <string name="cancel">Cancel</string>
 
     <string name="point_north">Point to the North Pole</string>
     <string name="point_location">Point to location</string>

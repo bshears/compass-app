@@ -2,8 +2,14 @@ package mariuszbaleczny.compass;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Address;
+import android.location.LocationManager;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -16,6 +22,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity implements CompassToLocationProvider.ChangeEventListener {
 
@@ -34,6 +41,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
     private TextView pointLocationAddressTextView;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
+    private Toast infoToast;
 
     private TextWatcher latitudeTextWatcher = new TextWatcher() {
         @Override
@@ -44,7 +52,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!isEmptyOrDash(s)) {
                 targetLatitude = Double.parseDouble(s.toString());
-                if(targetLatitude >= -90.0d && targetLatitude <= 90.0d) {
+                if (targetLatitude >= -90.0d && targetLatitude <= 90.0d) {
                     isTargetLatitude = true;
                 } else {
                     targetLatitude = Double.NaN;
@@ -73,7 +81,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!isEmptyOrDash(s)) {
                 targetLongitude = Double.parseDouble(s.toString());
-                if(targetLongitude >= -180.0d && targetLongitude <= 180.0d) {
+                if (targetLongitude >= -180.0d && targetLongitude <= 180.0d) {
                     isTargetLongitude = true;
                 } else {
                     targetLongitude = Double.NaN;
@@ -110,27 +118,35 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
         latitudeEditText.addTextChangedListener(latitudeTextWatcher);
         longitudeEditText.addTextChangedListener(longitudeTextWatcher);
-//        latitudeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    latitudeEditText.clearFocus();
-//                    hideKeyboard();
-//                }
-//                return false;
-//            }
-//        });
-//
-//        longitudeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                    longitudeEditText.clearFocus();
-//                    hideKeyboard();
-//                }
-//                return false;
-//            }
-//        });
+        latitudeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    latitudeEditText.clearFocus();
+                    if (longitudeEditText.getText().length() != 0) {
+                        hideKeyboard();
+                    } else {
+                        longitudeEditText.requestFocus();
+                    }
+                }
+                return false;
+            }
+        });
+
+        longitudeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    longitudeEditText.clearFocus();
+                    if(latitudeEditText.getText().length() != 0) {
+                        hideKeyboard();
+                    } else {
+                        latitudeEditText.requestFocus();
+                    }
+                }
+                return false;
+            }
+        });
 
         compassToLocationProvider = new CompassToLocationProvider(this,
                 NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA);
@@ -139,7 +155,16 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
     protected void onResume() {
         super.onResume();
-        compassToLocationProvider.start();
+        if (isCompassSensorPresent()) {
+            isLocationEnabled();
+        } else {
+
+            if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
+                infoToast = Toast.makeText(this, getString(R.string.compass_not_present),
+                        Toast.LENGTH_SHORT);
+                infoToast.show();
+            }
+        }
     }
 
     protected void onPause() {
@@ -147,14 +172,14 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         compassToLocationProvider.stop();
     }
 
-
-    private void hideKeyboard(){
+    private void hideKeyboard() {
         View view = this.getCurrentFocus();
         if (view != null) {
-            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
     private void animatePointer(double angle) {
         RotateAnimation ra = new RotateAnimation(
                 (float) currentAngle,
@@ -177,6 +202,50 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
     public void onCompassToLocationChange(double azimuth) {
         animatePointer(azimuth);
         currentAngle = -azimuth;
+    }
+
+    private boolean isCompassSensorPresent() {
+        PackageManager packageManager = getPackageManager();
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
+    }
+
+    private void isLocationEnabled() {
+        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if (!gps_enabled && !network_enabled) {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+            dialog.setMessage(getString(R.string.location_services_off));
+            dialog.setPositiveButton(getString(R.string.go_to_location_services), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivity(myIntent);
+                }
+            });
+            dialog.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+
+                @Override
+                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                }
+            });
+            dialog.show();
+        } else {
+            compassToLocationProvider.start();
+        }
     }
 
     @Override

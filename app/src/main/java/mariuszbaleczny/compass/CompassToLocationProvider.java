@@ -11,7 +11,10 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
@@ -37,6 +40,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private Location myLocation = new Location(LOCATION_PROVIDER);
     private Location targetLocation;
     private GeomagneticField geomagneticField;
+    private GetLocationAsyncTask getLocationAsyncTask;
 
     private ArrayList<Float> measurements = new ArrayList<>();
     private float[] mLastAccelerometer = new float[3];
@@ -76,16 +80,14 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         targetLocation.setLatitude(latitude);
         targetLocation.setLongitude(longitude);
 
-        Geocoder geocoder = new Geocoder(context, Locale.getDefault());
-        try {
-            List<Address> addressList = geocoder.getFromLocation(targetLocation.getLatitude(), targetLocation.getLongitude(), 1);
-            if (!addressList.isEmpty()) {
-                Address address = addressList.get(0);
+        getLocationAsyncTask = new GetLocationAsyncTask(context) {
+            @Override
+            protected void onPostExecute(Address address) {
+                super.onPostExecute(address);
                 changeEventListener.onLocationStateChange(address);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        };
+        getLocationAsyncTask.execute(targetLocation);
     }
 
     public void resetTargetLocation() {
@@ -107,11 +109,6 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             }
         }
 
-        if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
-            infoToast = Toast.makeText(this.context, this.context.getString(R.string.calibration_info),
-                    Toast.LENGTH_SHORT);
-            infoToast.show();
-        }
     }
 
     public void stop() {
@@ -159,12 +156,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(TAG, "Location Services OFF");
-        if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
-            infoToast = Toast.makeText(context, context.getString(R.string.accuracy_info),
-                    Toast.LENGTH_SHORT);
-            infoToast.show();
-            geomagneticField = null;
-        }
+        //TODO rerun onResume activity method
     }
 
     @Override
@@ -214,11 +206,19 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        if(sensor.equals(Sensor.TYPE_MAGNETIC_FIELD)) {
+            if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
+                if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
+                    infoToast = Toast.makeText(this.context, this.context.getString(R.string.calibration_info),
+                            Toast.LENGTH_SHORT);
+                    infoToast.show();
+                }
+            }
+        }
     }
 
     public interface ChangeEventListener {
         void onCompassToLocationChange(double azimuth);
-
         void onLocationStateChange(Address address);
     }
 }
