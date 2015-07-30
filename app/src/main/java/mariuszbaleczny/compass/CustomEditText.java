@@ -3,23 +3,11 @@ package mariuszbaleczny.compass;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
 public class CustomEditText extends EditText {
-
-//    private OnEditorActionListener onEditorActionListener = new OnEditorActionListener() {
-//        @Override
-//        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//            if (actionId == EditorInfo.IME_ACTION_DONE) {
-//                v.clearFocus();
-//            }
-//            return false;
-//        }
-//    };
 
     public CustomEditText(Context context) {
         super(context);
@@ -41,7 +29,7 @@ public class CustomEditText extends EditText {
         init();
     }
 
-    private void init(){
+    private void init() {
         this.setOnEditorActionListener(new OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -59,7 +47,7 @@ public class CustomEditText extends EditText {
                 event.getAction() == KeyEvent.ACTION_UP) {
             CustomEditText.this.clearFocus();
             return false;
-        } else if(keyCode == KeyEvent.KEYCODE_ENTER) {
+        } else if (keyCode == KeyEvent.KEYCODE_ENTER) {
             CustomEditText.this.clearFocus();
             return false;
         }

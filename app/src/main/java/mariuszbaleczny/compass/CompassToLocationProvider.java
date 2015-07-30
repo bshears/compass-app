@@ -7,28 +7,21 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.text.TextUtils;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 public class CompassToLocationProvider implements SensorEventListener, LocationListener {
 
     private final static String TAG = "CompassLocationProvider";
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private final static float ALPHA = 0.08f;
+    private boolean start = false;
     private ChangeEventListener changeEventListener;
     private Context context;
 
@@ -53,8 +46,6 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     private boolean mLastAccelerometerSet = false;
     private boolean mLastMagnetometerSet = false;
-
-    private Toast infoToast;
 
     public CompassToLocationProvider(Context context) {
         this(context, 3);
@@ -84,7 +75,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             @Override
             protected void onPostExecute(Address address) {
                 super.onPostExecute(address);
-                changeEventListener.onLocationStateChange(address);
+                changeEventListener.onLocationChange(address);
             }
         };
         getLocationAsyncTask.execute(targetLocation);
@@ -109,12 +100,15 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             }
         }
 
+        setProviderStartStatus(true);
+
     }
 
     public void stop() {
         sensorManager.unregisterListener(this, mAccelerometer);
         sensorManager.unregisterListener(this, mMagnetometer);
         locationManager.removeUpdates(this);
+        setProviderStartStatus(false);
     }
 
     private float[] lowPassFilter(float[] input, float[] output) {
@@ -133,6 +127,14 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             output += (float) arrayData.get(i);
         }
         return output / measurementsNumber;
+    }
+
+    public boolean isProvidedStarted(){
+        return start;
+    }
+
+    public void setProviderStartStatus(boolean value){
+        start = value;
     }
 
     @Override
@@ -156,7 +158,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(TAG, "Location Services OFF");
-        //TODO rerun onResume activity method
+        changeEventListener.recheckLocationAndNetowrkServicesSettings();
     }
 
     @Override
@@ -206,19 +208,20 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        if(sensor.equals(Sensor.TYPE_MAGNETIC_FIELD)) {
+        if (sensor.equals(Sensor.TYPE_MAGNETIC_FIELD)) {
             if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
-                    infoToast = Toast.makeText(this.context, this.context.getString(R.string.calibration_info),
-                            Toast.LENGTH_SHORT);
-                    infoToast.show();
-                }
+                changeEventListener.showInfoToastFromMainActivity(this.context.getString(R.string.calibration_info), Toast.LENGTH_SHORT);
             }
         }
     }
 
     public interface ChangeEventListener {
         void onCompassToLocationChange(double azimuth);
-        void onLocationStateChange(Address address);
+
+        void onLocationChange(Address address);
+
+        void showInfoToastFromMainActivity(String text, int length);
+
+        void recheckLocationAndNetowrkServicesSettings();
     }
 }
