@@ -21,7 +21,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private final static String TAG = "CompassLocationProvider";
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private final static float ALPHA = 0.08f;
-    private boolean start = false;
+    private boolean providerStarted = false;
     private ChangeEventListener changeEventListener;
     private Context context;
 
@@ -51,7 +51,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         this(context, 3);
     }
 
-    public CompassToLocationProvider(Context context, int numberOfMeasurements) {
+    public CompassToLocationProvider(final Context context, final int numberOfMeasurements) {
         this.context = context;
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -62,7 +62,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         this.numberOfMeasurements = numberOfMeasurements;
     }
 
-    public void setChangeEventListener(ChangeEventListener changeEventListener) {
+    public void setChangeEventListener(final ChangeEventListener changeEventListener) {
         this.changeEventListener = changeEventListener;
     }
 
@@ -85,22 +85,24 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         targetLocation = null;
     }
 
-    public void start() {
-        sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-        sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
+    public void startIfNotStarted() {
+        if(!providerStarted) {
+            sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
 
-        for (final String provider : locationManager.getProviders(true)) {
-            if (LocationManager.GPS_PROVIDER.equals(provider)
-                    || LocationManager.PASSIVE_PROVIDER.equals(provider)
-                    || LocationManager.NETWORK_PROVIDER.equals(provider)) {
-                if (myLocation == null) {
-                    myLocation = locationManager.getLastKnownLocation(provider);
+            for (final String provider : locationManager.getProviders(true)) {
+                if (LocationManager.GPS_PROVIDER.equals(provider)
+                        || LocationManager.PASSIVE_PROVIDER.equals(provider)
+                        || LocationManager.NETWORK_PROVIDER.equals(provider)) {
+                    if (myLocation == null) {
+                        myLocation = locationManager.getLastKnownLocation(provider);
+                    }
+                    locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
                 }
-                locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
             }
-        }
 
-        setProviderStartStatus(true);
+            setProviderStarted(true);
+        }
 
     }
 
@@ -108,7 +110,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         sensorManager.unregisterListener(this, mAccelerometer);
         sensorManager.unregisterListener(this, mMagnetometer);
         locationManager.removeUpdates(this);
-        setProviderStartStatus(false);
+        setProviderStarted(false);
     }
 
     private float[] lowPassFilter(float[] input, float[] output) {
@@ -129,12 +131,12 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         return output / measurementsNumber;
     }
 
-    public boolean isProvidedStarted(){
-        return start;
+    public boolean isProviderStarted(){
+        return providerStarted;
     }
 
-    public void setProviderStartStatus(boolean value){
-        start = value;
+    public void setProviderStarted(boolean value){
+        providerStarted = value;
     }
 
     @Override
@@ -158,7 +160,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderDisabled(String provider) {
         Log.d(TAG, "Location Services OFF");
-        changeEventListener.recheckLocationAndNetowrkServicesSettings();
+        changeEventListener.recheckLocationAndNetworkServicesSettings();
     }
 
     @Override
@@ -222,6 +224,6 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
         void showInfoToastFromMainActivity(String text, int length);
 
-        void recheckLocationAndNetowrkServicesSettings();
+        void recheckLocationAndNetworkServicesSettings();
     }
 }

@@ -30,18 +30,22 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
     private static final int NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA = 5;
     private static final int REQUEST_CODE_SETTINGS = 0;
+
     private static Toast infoToast;
     private CompassToLocationProvider compassToLocationProvider;
+
     private double currentAngle = 0d;
     private double targetLatitude = Double.NaN;
     private double targetLongitude = Double.NaN;
-    private boolean isTargetLatitude = false;
-    private boolean isTargetLongitude = false;
+    private boolean targetLatitudeInRange = false;
+    private boolean targetLongitudeInRange = false;
+
     private ImageView compassPointerView;
     private TextView titleTextView;
     private TextView subtitleTextView;
     private EditText latitudeEditText;
     private EditText longitudeEditText;
+
     private TextWatcher latitudeTextWatcher = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -51,24 +55,21 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!isEmptyOrDash(s)) {
                 targetLatitude = Double.parseDouble(s.toString());
-                if (targetLatitude >= -90.0d && targetLatitude <= 90.0d) {
-                    isTargetLatitude = true;
-                } else {
+                if (!isLatitudeInRange(targetLatitude)) {
                     targetLatitude = Double.NaN;
-                    isTargetLatitude = false;
                 }
             } else {
-                isTargetLatitude = false;
+                targetLatitudeInRange = false;
             }
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (isTargetLatitude & isTargetLongitude) {
+            if (targetLatitudeInRange & targetLongitudeInRange) {
                 compassToLocationProvider.setTargetLocationCoordinates(targetLatitude, targetLongitude);
             } else {
                 compassToLocationProvider.resetTargetLocation();
-                checkLocationAndNetworkServicesSettings();
+                isCompassPresentInDevice();
                 titleTextView.setText(getString(R.string.point_north));
             }
         }
@@ -82,24 +83,21 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!isEmptyOrDash(s)) {
                 targetLongitude = Double.parseDouble(s.toString());
-                if (targetLongitude >= -180.0d && targetLongitude <= 180.0d) {
-                    isTargetLongitude = true;
-                } else {
+                if (!isLongitudeInRange(targetLongitude)) {
                     targetLongitude = Double.NaN;
-                    isTargetLongitude = false;
                 }
             } else {
-                isTargetLongitude = false;
+                targetLongitudeInRange = false;
             }
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (isTargetLatitude && isTargetLongitude) {
+            if (targetLatitudeInRange && targetLongitudeInRange) {
                 compassToLocationProvider.setTargetLocationCoordinates(targetLatitude, targetLongitude);
             } else {
                 compassToLocationProvider.resetTargetLocation();
-                checkLocationAndNetworkServicesSettings();
+                isCompassPresentInDevice();
                 titleTextView.setText(getString(R.string.point_north));
             }
         }
@@ -130,9 +128,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                     } else {
                         longitudeEditText.requestFocus();
                     }
-                    //TODO check whether coordinates are provided
-//                    checkLocationAndNetworkServicesSettings();
-                    if(v.getText().length()==0) {
+                    if (v.getText().length() == 0) {
                         compassToLocationProvider.resetTargetLocation();
                     }
                 }
@@ -150,7 +146,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                     } else {
                         latitudeEditText.requestFocus();
                     }
-                    if(v.getText().length()==0) {
+                    if (v.getText().length() == 0) {
                         compassToLocationProvider.resetTargetLocation();
                     }
                 }
@@ -175,7 +171,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (checkLocationAndNetworkServicesSettings() && requestCode == REQUEST_CODE_SETTINGS) {
+        if (isCompassPresentInDevice() && requestCode == REQUEST_CODE_SETTINGS) {
             setLayoutElements(true);
         } else {
             setLayoutElements(false);
@@ -192,7 +188,6 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                 addressString += address.getAddressLine(0);
                 for (int i = 1; i < address.getMaxAddressLineIndex(); i++) {
                     addressString += ", " + address.getAddressLine(i);
-
                 }
             } else {
                 if (address.getCountryCode().equals("")) {
@@ -212,17 +207,17 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
     @Override
     public void showInfoToastFromMainActivity(String text, int length) {
-        showInfoToastIfPossible(text, length);
+        showInfoToastWith(text, length);
     }
 
     @Override
-    public void recheckLocationAndNetowrkServicesSettings() {
-        checkLocationAndNetworkServicesSettings();
+    public void recheckLocationAndNetworkServicesSettings() {
+        isCompassPresentInDevice();
     }
 
     protected void onResume() {
         super.onResume();
-        checkLocationAndNetworkServicesSettings();
+        isCompassPresentInDevice();
     }
 
     protected void onPause() {
@@ -230,7 +225,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         compassToLocationProvider.stop();
     }
 
-    public void showInfoToastIfPossible(String text, int length) {
+    public void showInfoToastWith(String text, int length) {
         if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
             infoToast = Toast.makeText(this, text, length);
             infoToast.show();
@@ -249,6 +244,16 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
     private void setSubtitleTextViewTo(String text) {
         subtitleTextView.setText(text);
+    }
+
+    private boolean isLatitudeInRange(double latitude){
+        targetLatitudeInRange = (latitude > -90.0d && latitude < 90.0d);
+        return targetLatitudeInRange;
+    }
+
+    private boolean isLongitudeInRange(double longitude){
+        targetLongitudeInRange = (longitude > -180.0d && longitude < 180.0d);
+        return targetLongitudeInRange;
     }
 
     private void hideKeyboard() {
@@ -289,14 +294,16 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
-    public boolean checkLocationAndNetworkServicesSettings() {
+    public boolean isCompassPresentInDevice() {
         if (isCompassSensorPresent()) {
             setTitleTextViewTo(getString(R.string.point_north), Color.BLACK);
-            compassToLocationProvider.start();
+            compassToLocationProvider.startIfNotStarted();
+
             return isLocationAndNetworkEnabled();
         } else {
             setTitleTextViewTo(getString(R.string.compass_not_detected), Color.RED);
             setLayoutElements(false);
+
             return false;
         }
     }
@@ -312,7 +319,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         }
 
         if (!gpsEnabled || !isOnline()) {
-            setSubtitleTextViewTo(getString(R.string.tap_info_error));
+            setSubtitleTextViewTo(getString(R.string.touch_info_error));
             subtitleTextView.setVisibility(View.VISIBLE);
             subtitleTextView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -324,14 +331,16 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
             AlertDialog.Builder dialog = new AlertDialog.Builder(this);
 
             if (!gpsEnabled && isOnline()) {
-                dialog.setMessage(getString(R.string.location_services_off));
+                dialog.setTitle(getString(R.string.location_services_off));
             } else if (!isOnline() && gpsEnabled) {
-                dialog.setMessage(getString(R.string.no_internet_connection));
+                dialog.setTitle(getString(R.string.no_internet_connection));
             } else {
-                dialog.setMessage(getString(R.string.no_internet_no_locations));
+                dialog.setTitle(getString(R.string.no_internet_no_locations));
             }
 
-            dialog.setPositiveButton(getString(R.string.go_to_settings), new DialogInterface.OnClickListener() {
+            dialog.setMessage(getString(R.string.go_to_settings));
+
+            dialog.setPositiveButton(getString(R.string.agree), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                     Intent myIntent = new Intent(Settings.ACTION_SETTINGS);
@@ -339,7 +348,7 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                 }
             });
 
-            dialog.setNegativeButton(getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            dialog.setNegativeButton(getString(R.string.dismiss), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                 }
@@ -348,11 +357,9 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
 
             return false;
         } else {
-            if(!compassToLocationProvider.isProvidedStarted()) {
-                compassToLocationProvider.start();
-            }
+            compassToLocationProvider.startIfNotStarted();
             subtitleTextView.setVisibility(View.VISIBLE);
-            subtitleTextView.setText(getString(R.string.tap_info));
+            subtitleTextView.setText(getString(R.string.info_text));
             subtitleTextView.setOnClickListener(null);
             setLayoutElements(true);
 

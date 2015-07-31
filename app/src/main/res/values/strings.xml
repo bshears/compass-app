@@ -1,26 +1,23 @@
 <resources>
-    <string name="app_name">Compass</string>
-    <string name="title_activity_main">Compass</string>
 
+    <string name="app_name">Compass</string>
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
-    <string name="go_to_settings">Go to Settings</string>
-    <string name="go_to_wifi_settings">Go to Wi-Fi Settings</string>
     <string name="no_internet_connection">No Internet connection</string>
-    <string name="no_internet_no_locations">Internet and Location Services are off</string>
-    <string name="turn_on_cellular_data">Turn Cellular Data ON</string>
-    <string name="cancel">Cancel</string>
+    <string name="no_internet_no_locations">Internet and location services are off</string>
+    <string name="go_to_settings">Do you want to go to Settings and turn it on?</string>
+    <string name="dismiss">DISMISS</string>
+    <string name="agree">AGREE</string>
 
     <string name="calibration_info">Calibrate the magnetic sensor (figure 8 pattern)</string>
-    <string name="accuracy_info">Turn On Location Services for better accuracy!</string>
-    <string name="location_services_off">Location Services are disabled</string>
+    <string name="location_services_off">Location services are turned off</string>
 
-    <string name="point_north">Point to the North Pole</string>
-    <string name="point_location">Point to location</string>
-    <string name="compass_not_detected">No compass in your device!</string>
+    <string name="point_north">Pointing to the North Pole</string>
+    <string name="point_location">Pointing to location</string>
+    <string name="compass_not_detected">There\'s no compass in your device</string>
 
-    <string name="tap_info_error">Something\'s wrong. Tap to get info!</string>
-    <string name="tap_info">Type in location coordinates you want to point to</string>
+    <string name="touch_info_error">Something\'s wrong \n Touch here to fix it</string>
+    <string name="info_text">You can type in coordinates of specific location</string>
     <string name="address">Address</string>
 
 </resources>
