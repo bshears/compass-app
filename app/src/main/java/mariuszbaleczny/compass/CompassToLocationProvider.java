@@ -6,7 +6,6 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Address;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -21,6 +20,8 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private final static String TAG = "CompassLocationProvider";
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private final static float ALPHA = 0.08f;
+    private final static int NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA = 3;
+
     private boolean providerStarted = false;
     private ChangeEventListener changeEventListener;
     private Context context;
@@ -33,7 +34,6 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private Location myLocation = new Location(LOCATION_PROVIDER);
     private Location targetLocation;
     private GeomagneticField geomagneticField;
-    private GetLocationAsyncTask getLocationAsyncTask;
 
     private ArrayList<Float> measurements = new ArrayList<>();
     private float[] mLastAccelerometer = new float[3];
@@ -48,7 +48,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private boolean mLastMagnetometerSet = false;
 
     public CompassToLocationProvider(Context context) {
-        this(context, 3);
+        this(context, NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA);
     }
 
     public CompassToLocationProvider(final Context context, final int numberOfMeasurements) {
@@ -60,83 +60,6 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         this.mMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
 
         this.numberOfMeasurements = numberOfMeasurements;
-    }
-
-    public void setChangeEventListener(final ChangeEventListener changeEventListener) {
-        this.changeEventListener = changeEventListener;
-    }
-
-    public void setTargetLocationCoordinates(double latitude, double longitude) {
-        targetLocation = new Location(LOCATION_PROVIDER);
-        targetLocation.setLatitude(latitude);
-        targetLocation.setLongitude(longitude);
-
-        getLocationAsyncTask = new GetLocationAsyncTask(context) {
-            @Override
-            protected void onPostExecute(Address address) {
-                super.onPostExecute(address);
-                changeEventListener.onLocationChange(address);
-            }
-        };
-        getLocationAsyncTask.execute(targetLocation);
-    }
-
-    public void resetTargetLocation() {
-        targetLocation = null;
-    }
-
-    public void startIfNotStarted() {
-        if(!providerStarted) {
-            sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-            sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
-
-            for (final String provider : locationManager.getProviders(true)) {
-                if (LocationManager.GPS_PROVIDER.equals(provider)
-                        || LocationManager.PASSIVE_PROVIDER.equals(provider)
-                        || LocationManager.NETWORK_PROVIDER.equals(provider)) {
-                    if (myLocation == null) {
-                        myLocation = locationManager.getLastKnownLocation(provider);
-                    }
-                    locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
-                }
-            }
-
-            setProviderStarted(true);
-        }
-
-    }
-
-    public void stop() {
-        sensorManager.unregisterListener(this, mAccelerometer);
-        sensorManager.unregisterListener(this, mMagnetometer);
-        locationManager.removeUpdates(this);
-        setProviderStarted(false);
-    }
-
-    private float[] lowPassFilter(float[] input, float[] output) {
-        if (output == null) return input;
-
-        for (int i = 0; i < input.length; i++) {
-            output[i] = output[i] + ALPHA * (input[i] - output[i]);
-        }
-        return output;
-    }
-
-    private float getMeasurementAverage(int measurementsNumber, ArrayList arrayData) {
-        float output = 0f;
-
-        for (int i = 0; i < measurementsNumber; i++) {
-            output += (float) arrayData.get(i);
-        }
-        return output / measurementsNumber;
-    }
-
-    public boolean isProviderStarted(){
-        return providerStarted;
-    }
-
-    public void setProviderStarted(boolean value){
-        providerStarted = value;
     }
 
     @Override
@@ -154,13 +77,18 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onProviderEnabled(String provider) {
-        Log.d(TAG, "Location Services ON");
+        if (provider.contains(context.getString(R.string.gps_provider))) {
+            Log.d(TAG, provider + " : Location Services ON");
+            changeEventListener.setLayoutElementsOnProvider(true);
+        }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        Log.d(TAG, "Location Services OFF");
-        changeEventListener.recheckLocationAndNetworkServicesSettings();
+        if (provider.contains(context.getString(R.string.gps_provider))) {
+            Log.d(TAG, provider + " : Location Services OFF");
+            changeEventListener.setLayoutElementsOnProvider(false);
+        }
     }
 
     @Override
@@ -194,13 +122,13 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
                         azimuth = azimuth - bearing;
                     }
 
-                    changeEventListener.onCompassToLocationChange(azimuth);
                 } else {
                     azimuth = azimuthInDegrees;
-                    changeEventListener.onCompassToLocationChange(azimuth);
                 }
 
+                changeEventListener.onCompassToLocationChange(azimuth);
                 measurementCounter = 0;
+
             } else {
                 measurementCounter++;
             }
@@ -210,20 +138,87 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        if (sensor.equals(Sensor.TYPE_MAGNETIC_FIELD)) {
+        if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                changeEventListener.showInfoToastFromMainActivity(this.context.getString(R.string.calibration_info), Toast.LENGTH_SHORT);
+                changeEventListener.showInfoToastFromMainActivity(this.context.getString(R.string.calibration_info_toast), Toast.LENGTH_SHORT);
             }
         }
+    }
+
+    public void setChangeEventListener(final ChangeEventListener changeEventListener) {
+        this.changeEventListener = changeEventListener;
+    }
+
+    public void setTargetLocationCoordinates(double latitude, double longitude) {
+        targetLocation = new Location(LOCATION_PROVIDER);
+        targetLocation.setLatitude(latitude);
+        targetLocation.setLongitude(longitude);
+        changeEventListener.onLocationPoint();
+    }
+
+    public void resetTargetLocation() {
+        targetLocation = null;
+    }
+
+    public void startIfNotStarted() {
+        if (!providerStarted) {
+            sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
+
+            for (final String provider : locationManager.getProviders(true)) {
+                if (LocationManager.GPS_PROVIDER.equals(provider)
+                        || LocationManager.PASSIVE_PROVIDER.equals(provider)
+                        || LocationManager.NETWORK_PROVIDER.equals(provider)) {
+                    if (myLocation == null) {
+                        myLocation = locationManager.getLastKnownLocation(provider);
+                    }
+                    locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
+                }
+            }
+
+            setProviderStarted(true);
+        }
+
+    }
+
+    public void stopIfStarted() {
+        if (providerStarted) {
+            sensorManager.unregisterListener(this, mAccelerometer);
+            sensorManager.unregisterListener(this, mMagnetometer);
+            locationManager.removeUpdates(this);
+            setProviderStarted(false);
+        }
+    }
+
+    public void setProviderStarted(boolean value) {
+        providerStarted = value;
+    }
+
+    private float[] lowPassFilter(float[] input, float[] output) {
+        if (output == null) return input;
+
+        for (int i = 0; i < input.length; i++) {
+            output[i] = output[i] + ALPHA * (input[i] - output[i]);
+        }
+        return output;
+    }
+
+    private float getMeasurementAverage(int measurementsNumber, ArrayList arrayData) {
+        float output = 0f;
+
+        for (int i = 0; i < measurementsNumber; i++) {
+            output += (float) arrayData.get(i);
+        }
+        return output / measurementsNumber;
     }
 
     public interface ChangeEventListener {
         void onCompassToLocationChange(double azimuth);
 
-        void onLocationChange(Address address);
+        void onLocationPoint();
 
         void showInfoToastFromMainActivity(String text, int length);
 
-        void recheckLocationAndNetworkServicesSettings();
+        void setLayoutElementsOnProvider(boolean enabled);
     }
 }

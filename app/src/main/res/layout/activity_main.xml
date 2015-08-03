@@ -20,28 +20,26 @@
         android:weightSum="2">
 
         <TextView
-            android:id="@+id/pointTitleTextView"
+            android:id="@+id/titleTextView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center_vertical|center_horizontal"
-            android:text="@string/point_north"
+            android:text="@string/point_north_title"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
-            android:id="@+id/pointLocationAddressTextView"
+            android:id="@+id/subtitleTextView"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="top"
             android:layout_weight="1"
             android:gravity="top|center_horizontal"
-            android:text="@string/address"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:visibility="visible"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
-            android:autoLink="map" />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:visibility="visible" />
 
     </LinearLayout>
 
@@ -58,11 +56,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:baselineAligned="false"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:orientation="horizontal"
-        android:weightSum="2"
-        android:baselineAligned="false">
+        android:weightSum="2">
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
@@ -77,7 +75,7 @@
                 android:layout_gravity="center"
                 android:ems="10"
                 android:gravity="center_vertical|start"
-                android:hint="@string/latitude"
+                android:hint="@string/latitude_edit_text"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
                 android:singleLine="true" />
@@ -97,7 +95,7 @@
                 android:layout_gravity="center"
                 android:ems="10"
                 android:gravity="center_vertical|start"
-                android:hint="@string/longitude"
+                android:hint="@string/longitude_edit_text"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
                 android:singleLine="true" />

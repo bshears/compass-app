@@ -1,23 +1,25 @@
 <resources>
 
     <string name="app_name">Compass</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
-    <string name="no_internet_connection">No Internet connection</string>
-    <string name="no_internet_no_locations">Internet and location services are off</string>
-    <string name="go_to_settings">Do you want to go to Settings and turn it on?</string>
-    <string name="dismiss">DISMISS</string>
-    <string name="agree">AGREE</string>
 
-    <string name="calibration_info">Calibrate the magnetic sensor (figure 8 pattern)</string>
-    <string name="location_services_off">Location services are turned off</string>
+    <string name="latitude_edit_text">Latitude</string>
+    <string name="longitude_edit_text">Longitude</string>
 
-    <string name="point_north">Pointing to the North Pole</string>
-    <string name="point_location">Pointing to location</string>
-    <string name="compass_not_detected">There\'s no compass in your device</string>
+    <string name="title_alert_dialog">Use Google\'s location service?</string>
+    <string name="message_alert_dialog">Let the app determine location and point compass to specific location.</string>
+    <string name="negative_alert_dialog">DISMISS</string>
+    <string name="positive_alert_dialog">AGREE</string>
 
-    <string name="touch_info_error">Something\'s wrong \n Touch here to fix it</string>
-    <string name="info_text">You can type in coordinates of specific location</string>
-    <string name="address">Address</string>
+    <string name="calibration_info_toast">Calibrate the magnetic sensor (figure 8 pattern)</string>
+
+    <string name="point_north_title">Pointing to the North Pole</string>
+    <string name="point_location_title">Pointing to location</string>
+    <string name="compass_not_detected_title">There\'s no compass in your device</string>
+
+    <string name="touch_info_error_subtitle">Use Google\'s location services? \n Touch here to get learn more</string>
+    <string name="info_text_subtitle">You can type in coordinates of specific location</string>
+
+    <string name="gps_provider">gps</string>
+    <string name="minus_sign">-</string>
 
 </resources>
