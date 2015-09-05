@@ -140,7 +140,9 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
         if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
             if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                changeEventListener.showInfoToastFromMainActivity(this.context.getString(R.string.calibration_info_toast), Toast.LENGTH_SHORT);
+                changeEventListener.showInfoToastFromMainActivity(
+                        this.context.getString(R.string.calibration_info_toast),
+                        Toast.LENGTH_SHORT);
             }
         }
     }
@@ -175,10 +177,8 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
                     locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
                 }
             }
-
             setProviderStarted(true);
         }
-
     }
 
     public void stopIfStarted() {

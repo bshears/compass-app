@@ -70,12 +70,12 @@
 
             <mariuszbaleczny.compass.CustomEditText
                 android:id="@+id/latitudeMainActivity"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:ems="10"
                 android:gravity="center_vertical|start"
                 android:hint="@string/latitude_edit_text"
+                android:textSize="@dimen/edit_text_size"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
                 android:singleLine="true" />
@@ -90,12 +90,12 @@
 
             <mariuszbaleczny.compass.CustomEditText
                 android:id="@+id/longitudeMainActivity"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:ems="10"
                 android:gravity="center_vertical|start"
                 android:hint="@string/longitude_edit_text"
+                android:textSize="@dimen/edit_text_size"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
                 android:singleLine="true" />

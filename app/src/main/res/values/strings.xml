@@ -16,7 +16,7 @@
     <string name="point_location_title">Pointing to location</string>
     <string name="compass_not_detected_title">There\'s no compass in your device</string>
 
-    <string name="touch_info_error_subtitle">Use Google\'s location services? \n Touch here to get learn more</string>
+    <string name="touch_info_error_subtitle">Google\'s location services are off. \n Touch here to learn more</string>
     <string name="info_text_subtitle">You can type in coordinates of specific location</string>
 
     <string name="gps_provider">gps</string>

@@ -1,6 +1,5 @@
 package mariuszbaleczny.compass;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +9,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.KeyEvent;
@@ -23,7 +23,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements CompassToLocationProvider.ChangeEventListener {
+public class MainActivity extends AppCompatActivity implements CompassToLocationProvider.ChangeEventListener {
 
     private static final int REQUEST_CODE_SETTINGS = 0;
 
@@ -45,7 +45,6 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                latitudeEditText.clearFocus();
                 if (longitudeEditText.getText().length() != 0) {
                     hideKeyboard();
                 } else {
@@ -54,15 +53,16 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                 if (v.getText().length() == 0) {
                     compassToLocationProvider.resetTargetLocation();
                 }
+                return true;
+            } else {
+                return false;
             }
-            return false;
         }
     };
     private TextView.OnEditorActionListener longitudeEditorActionListener = new TextView.OnEditorActionListener() {
         @Override
         public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                longitudeEditText.clearFocus();
                 if (latitudeEditText.getText().length() != 0) {
                     hideKeyboard();
                 } else {
@@ -71,8 +71,11 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
                 if (v.getText().length() == 0) {
                     compassToLocationProvider.resetTargetLocation();
                 }
+                return true;
+            } else {
+                return false;
             }
-            return false;
+
         }
     };
     private View.OnClickListener subtitleOnClickListener = new View.OnClickListener() {
@@ -215,9 +218,9 @@ public class MainActivity extends Activity implements CompassToLocationProvider.
         }
     }
 
-    public void showInfoToastWith(String text, int length) {
+    public void showInfoToastWith(String text, int toastLength) {
         if (infoToast == null || infoToast.getView().getWindowVisibility() != View.VISIBLE) {
-            infoToast = Toast.makeText(this, text, length);
+            infoToast = Toast.makeText(this, text, toastLength);
             infoToast.show();
         }
     }
