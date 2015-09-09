@@ -11,7 +11,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -19,11 +18,10 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     private final static String TAG = "CompassLocationProvider";
     private final static String LOCATION_PROVIDER = "LocationProvider";
-    private final static float ALPHA = 0.08f;
-    private final static int NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA = 3;
+    private final static int MEASUREMENTS_COUNT = 3;
 
     private boolean providerStarted = false;
-    private ChangeEventListener changeEventListener;
+    private CompassToLocationListener compassToLocationListener;
     private Context context;
 
     private LocationManager locationManager;
@@ -42,29 +40,29 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     private float[] mOrientation = new float[3];
 
     private int measurementCounter = 0;
-    private int numberOfMeasurements = 0;
 
     private boolean mLastAccelerometerSet = false;
     private boolean mLastMagnetometerSet = false;
 
     public CompassToLocationProvider(Context context) {
-        this(context, NUMBER_OF_MEASUREMENTS_FOR_SMOOTHING_DATA);
+        this(context, MEASUREMENTS_COUNT);
     }
 
     public CompassToLocationProvider(final Context context, final int numberOfMeasurements) {
         this.context = context;
+
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
         this.mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         this.mMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-
-        this.numberOfMeasurements = numberOfMeasurements;
     }
 
     @Override
     public void onLocationChanged(Location location) {
         this.myLocation = location;
+        Log.d("Location", String.format("latitude: %f, longitude: %f", location.getLatitude(),
+                location.getLongitude()));
         geomagneticField = new GeomagneticField((float) this.myLocation.getLatitude(),
                 (float) this.myLocation.getLongitude(),
                 (float) this.myLocation.getAltitude(),
@@ -79,7 +77,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     public void onProviderEnabled(String provider) {
         if (provider.contains(context.getString(R.string.gps_provider))) {
             Log.d(TAG, provider + " : Location Services ON");
-            changeEventListener.setLayoutElementsOnProvider(true);
+            compassToLocationListener.setLayoutElementsOnProvider(true);
         }
     }
 
@@ -87,17 +85,17 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     public void onProviderDisabled(String provider) {
         if (provider.contains(context.getString(R.string.gps_provider))) {
             Log.d(TAG, provider + " : Location Services OFF");
-            changeEventListener.setLayoutElementsOnProvider(false);
+            compassToLocationListener.setLayoutElementsOnProvider(false);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor == mAccelerometer) {
-            mLastAccelerometer = lowPassFilter(event.values.clone(), mLastAccelerometer.clone());
+            mLastAccelerometer = Utils.lowPassFilter(event.values.clone(), mLastAccelerometer.clone());
             mLastAccelerometerSet = true;
         } else if (event.sensor == mMagnetometer) {
-            mLastMagnetometer = lowPassFilter(event.values.clone(), mLastMagnetometer.clone());
+            mLastMagnetometer = Utils.lowPassFilter(event.values.clone(), mLastMagnetometer.clone());
             mLastMagnetometerSet = true;
         }
 
@@ -106,56 +104,41 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
             SensorManager.getOrientation(mR, mOrientation);
             float azimuthInRadians = mOrientation[0];
 
-            float azimuthInDegrees = (float) ((Math.toDegrees(azimuthInRadians) + 360f) % 360f);
+            float azimuthInDegrees = (int) ((Math.toDegrees(azimuthInRadians) + 360f) % 360f);
             azimuthInDegrees = Math.round(azimuthInDegrees);
 
             measurements.add(measurementCounter, azimuthInDegrees);
+            measurementCounter++;
 
-            if (measurementCounter == numberOfMeasurements) {
-                double azimuth = getMeasurementAverage(numberOfMeasurements, measurements);
-
+            if (measurementCounter == MEASUREMENTS_COUNT) {
+                float northAngle = Utils.getMeasurementsAverage(MEASUREMENTS_COUNT, measurements);
+                float locationAngle = 0f;
                 if (geomagneticField != null) {
-                    azimuth = azimuth + geomagneticField.getDeclination();
-
+                    northAngle = northAngle + geomagneticField.getDeclination();
                     if (targetLocation != null) {
                         float bearing = myLocation.bearingTo(targetLocation);
-                        azimuth = azimuth - bearing;
+                        locationAngle = northAngle - bearing;
                     }
-
-                } else {
-                    azimuth = azimuthInDegrees;
                 }
-
-                changeEventListener.onCompassToLocationChange(azimuth);
+                compassToLocationListener.onCompassPointerRotate((int) northAngle, (int) locationAngle);
                 measurementCounter = 0;
-
-            } else {
-                measurementCounter++;
             }
-
         }
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        if (sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
-            if (accuracy == SensorManager.SENSOR_STATUS_ACCURACY_LOW) {
-                changeEventListener.showInfoToastFromMainActivity(
-                        this.context.getString(R.string.calibration_info_toast),
-                        Toast.LENGTH_SHORT);
-            }
-        }
     }
 
-    public void setChangeEventListener(final ChangeEventListener changeEventListener) {
-        this.changeEventListener = changeEventListener;
+    public void setCompassToLocationListener(final CompassToLocationListener compassToLocationListener) {
+        this.compassToLocationListener = compassToLocationListener;
     }
 
     public void setTargetLocationCoordinates(double latitude, double longitude) {
         targetLocation = new Location(LOCATION_PROVIDER);
         targetLocation.setLatitude(latitude);
         targetLocation.setLongitude(longitude);
-        changeEventListener.onLocationPoint();
+        compassToLocationListener.setTitleOnPointingLocation();
     }
 
     public void resetTargetLocation() {
@@ -194,30 +177,10 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         providerStarted = value;
     }
 
-    private float[] lowPassFilter(float[] input, float[] output) {
-        if (output == null) return input;
+    public interface CompassToLocationListener {
+        void onCompassPointerRotate(int north, int azimuth);
 
-        for (int i = 0; i < input.length; i++) {
-            output[i] = output[i] + ALPHA * (input[i] - output[i]);
-        }
-        return output;
-    }
-
-    private float getMeasurementAverage(int measurementsNumber, ArrayList arrayData) {
-        float output = 0f;
-
-        for (int i = 0; i < measurementsNumber; i++) {
-            output += (float) arrayData.get(i);
-        }
-        return output / measurementsNumber;
-    }
-
-    public interface ChangeEventListener {
-        void onCompassToLocationChange(double azimuth);
-
-        void onLocationPoint();
-
-        void showInfoToastFromMainActivity(String text, int length);
+        void setTitleOnPointingLocation();
 
         void setLayoutElementsOnProvider(boolean enabled);
     }

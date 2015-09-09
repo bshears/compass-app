@@ -43,13 +43,25 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/arrowPointer"
-        android:layout_width="match_parent"
+    <RelativeLayout
+        android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_weight="7"
-        android:src="@drawable/compass_arrow" />
+        android:layout_weight="7">
+
+        <ImageView
+            android:id="@+id/compass_rose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/compass_rose" />
+
+        <ImageView
+            android:id="@+id/compass_pointer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/compass_needle" />
+
+    </RelativeLayout>
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -75,10 +87,10 @@
                 android:layout_gravity="center"
                 android:gravity="center_vertical|start"
                 android:hint="@string/latitude_edit_text"
-                android:textSize="@dimen/edit_text_size"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textSize="@dimen/edit_text_size" />
 
         </android.support.design.widget.TextInputLayout>
 
@@ -86,7 +98,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="start|center_horizontal">
+            android:gravity="center_horizontal|start">
 
             <mariuszbaleczny.compass.CustomEditText
                 android:id="@+id/longitudeMainActivity"
@@ -95,10 +107,10 @@
                 android:layout_gravity="center"
                 android:gravity="center_vertical|start"
                 android:hint="@string/longitude_edit_text"
-                android:textSize="@dimen/edit_text_size"
                 android:imeOptions="actionDone"
                 android:inputType="numberSigned|numberDecimal"
-                android:singleLine="true" />
+                android:singleLine="true"
+                android:textSize="@dimen/edit_text_size" />
         </android.support.design.widget.TextInputLayout>
     </LinearLayout>
 
