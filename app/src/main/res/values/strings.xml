@@ -11,6 +11,7 @@
     <string name="positive_alert_dialog">AGREE</string>
 
     <string name="calibration_info_toast">Calibrate the magnetic sensor (figure 8 pattern)</string>
+    <string name="press_again_to_exit_toast">Press back again to exit</string>
 
     <string name="point_north_title">Pointing to the North Pole</string>
     <string name="point_location_title">Pointing to location</string>

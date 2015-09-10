@@ -2,6 +2,7 @@ package mariuszbaleczny.compass;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -10,34 +11,41 @@ import java.util.List;
 
 public class Utils {
 
-    public static float[] lowPassFilter(float[] input, float[] output) {
+    public static float[] lowPassFilter(float[] input, float[] output, float smoothCoefficient) {
+        float[] out;
         if (output == null) {
             return (input != null) ? input : new float[3];
         }
+        if (input == null) {
+            return output;
+        }
+        out = output.clone();
 
         try {
             for (int i = 0; i < input.length; i++) {
-                output[i] = output[i] + Constants.ALPHA * (input[i] - output[i]);
+                out[i] = output[i] + smoothCoefficient * (input[i] - output[i]);
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            Log.e("Utils.java", e.getMessage());
+            Log.e(Utils.class.getName(), e.getMessage());
         }
-        return output;
+        return out;
     }
 
-    public static float getMeasurementsAverage(int measurementsNumber, List data) {
+    public static float getMeasurementsAverage(int measurementsCount, List<Float> data) {
         float output = 0f;
 
         if (data == null) {
             return output;
         }
-        measurementsNumber = (measurementsNumber <= 0) ? 1 : measurementsNumber;
-
-        for (int i = 0; i < measurementsNumber; i++) {
-            output += (float) data.get(i);
+        if (measurementsCount <= 0) {
+            return 0f;
         }
 
-        return output / measurementsNumber;
+        for (int i = 0; i < measurementsCount; i++) {
+            output += data.get(i);
+        }
+
+        return output / measurementsCount;
     }
 
     public static boolean isCoordinateInRange(double coordinate, boolean latitude) {
@@ -51,6 +59,16 @@ public class Utils {
     public static boolean isCompassSensorPresent(Context context) {
         PackageManager packageManager = context.getPackageManager();
         return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
+    }
+
+    public static boolean isLocationServiceEnabled(Context context) {
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        try {
+            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception e) {
+            Log.e(context.getClass().getName(), e.getMessage());
+            return false;
+        }
     }
 
     public static void hideKeyboard(View view, Context context) {

@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.Custom;
+package mariuszbaleczny.compass.custom;
 
 import android.content.Context;
 import android.support.annotation.NonNull;

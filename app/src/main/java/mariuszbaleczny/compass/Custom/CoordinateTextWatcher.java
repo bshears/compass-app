@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.Custom;
+package mariuszbaleczny.compass.custom;
 
 import android.text.Editable;
 import android.text.TextUtils;

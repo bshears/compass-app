@@ -19,28 +19,29 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private final static int MEASUREMENTS_COUNT = 3;
+
+    private final Context context;
     private final LocationManager locationManager;
     private final SensorManager sensorManager;
+    private final Sensor accelerometer;
+    private final Sensor magnetometer;
+
     private boolean providerStarted = false;
-    private CompassToLocationListener compassToLocationListener;
-    private Context context;
-    private Sensor accelerometer;
-    private Sensor magnetometer;
-
-    private Location myLocation = new Location(LOCATION_PROVIDER);
-    private Location targetLocation;
-    private GeomagneticField geomagneticField;
-
-    private List<Float> measurements = new ArrayList<>();
     private float[] lastAccelerometer = new float[3];
     private float[] lastMagnetometer = new float[3];
     private float[] rotationMatrix = new float[9];
     private float[] orientationVector = new float[3];
 
+    private List<Float> measurements = new ArrayList<>();
     private int measurementCounter = 0;
-
     private boolean lastAccelerometerSet = false;
     private boolean lastMagnetometerSet = false;
+
+    private Location myLocation = new Location(LOCATION_PROVIDER);
+    private Location targetLocation;
+    private GeomagneticField geomagneticField;
+
+    private CompassToLocationListener compassToLocationListener;
 
     public CompassToLocationProvider(final Context context) {
         this.context = context;
@@ -89,10 +90,12 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor == accelerometer) {
-            lastAccelerometer = Utils.lowPassFilter(event.values.clone(), lastAccelerometer.clone());
+            lastAccelerometer = Utils.lowPassFilter(event.values.clone(), lastAccelerometer.clone(),
+                    Constants.LOW_PASS_FILTER_SMOOTH_COEFFICIENT);
             lastAccelerometerSet = true;
         } else if (event.sensor == magnetometer) {
-            lastMagnetometer = Utils.lowPassFilter(event.values.clone(), lastMagnetometer.clone());
+            lastMagnetometer = Utils.lowPassFilter(event.values.clone(), lastMagnetometer.clone(),
+                    Constants.LOW_PASS_FILTER_SMOOTH_COEFFICIENT);
             lastMagnetometerSet = true;
         }
 

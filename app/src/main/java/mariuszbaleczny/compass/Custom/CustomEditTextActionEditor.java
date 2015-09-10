@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.Custom;
+package mariuszbaleczny.compass.custom;
 
 import android.content.Context;
 import android.view.KeyEvent;
@@ -11,20 +11,14 @@ import mariuszbaleczny.compass.Utils;
 
 public class CustomEditTextActionEditor implements TextView.OnEditorActionListener {
 
-    private final boolean latitude;
-    private final CustomEditText latitudeEditText;
-    private final CustomEditText longitudeEditText;
+    private final CustomEditText coordinateEditText;
     private final CompassToLocationProvider compassProvider;
     private final Context context;
 
     public CustomEditTextActionEditor(Context context,
-                                      CustomEditText latitudeEditText,
-                                      CustomEditText longitudeEditText,
-                                      CompassToLocationProvider compassProvider,
-                                      boolean latitude) {
-        this.latitude = latitude;
-        this.latitudeEditText = latitudeEditText;
-        this.longitudeEditText = longitudeEditText;
+                                      CustomEditText coordinateEditText,
+                                      CompassToLocationProvider compassProvider) {
+        this.coordinateEditText = coordinateEditText;
         this.compassProvider = compassProvider;
         this.context = context;
     }
@@ -32,19 +26,15 @@ public class CustomEditTextActionEditor implements TextView.OnEditorActionListen
     @Override
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
-            if (latitude) {
-                controlFocus(longitudeEditText, v, context);
-            } else {
-                controlFocus(latitudeEditText, v, context);
-            }
-            resetTargetLocationIfEmptyTextView(v, compassProvider);
+            controlFocus(coordinateEditText, v);
+            resetTargetLocationIfEmptyTextView(v);
             return true;
         } else {
             return false;
         }
     }
 
-    public void controlFocus(CustomEditText editText, View view, Context context) {
+    private void controlFocus(CustomEditText editText, View view) {
         if (editText.getText().length() != 0) {
             Utils.hideKeyboard(view, context);
         } else {
@@ -52,9 +42,11 @@ public class CustomEditTextActionEditor implements TextView.OnEditorActionListen
         }
     }
 
-    public void resetTargetLocationIfEmptyTextView(TextView v, CompassToLocationProvider provider) {
+    private void resetTargetLocationIfEmptyTextView(TextView v) {
         if (v.getText().length() == 0) {
-            provider.resetTargetLocation();
+            if (compassProvider != null) {
+                compassProvider.resetTargetLocation();
+            }
         }
     }
 

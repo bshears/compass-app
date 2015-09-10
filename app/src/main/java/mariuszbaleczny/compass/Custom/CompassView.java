@@ -1,8 +1,11 @@
-package mariuszbaleczny.compass.Custom;
+package mariuszbaleczny.compass.custom;
 
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+
+import mariuszbaleczny.compass.Constants;
 
 public class CompassView {
 
@@ -21,9 +24,10 @@ public class CompassView {
         RotateAnimation ra = new RotateAnimation(
                 currentNorthAngle,
                 -angle,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(600);
+                Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE,
+                Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
+        ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
+        ra.setDuration(Constants.ANIMATION_DURATION);
         ra.setFillAfter(true);
 
         currentNorthAngle = -angle;
@@ -34,28 +38,12 @@ public class CompassView {
         RotateAnimation ra = new RotateAnimation(
                 currentLocationAngle,
                 -angle,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(600);
+                Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE,
+                Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
+        ra.setDuration(Constants.ANIMATION_DURATION);
         ra.setFillAfter(true);
 
         currentLocationAngle = -angle;
         compassNeedle.startAnimation(ra);
-    }
-
-    public float getCurrentNorthAngle() {
-        return currentNorthAngle;
-    }
-
-    public void setCurrentNorthAngle(float currentNorthAngle) {
-        this.currentNorthAngle = currentNorthAngle;
-    }
-
-    public float getCurrentLocationAngle() {
-        return currentLocationAngle;
-    }
-
-    public void setCurrentLocationAngle(float currentLocationAngle) {
-        this.currentLocationAngle = currentLocationAngle;
     }
 }

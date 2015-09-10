@@ -1,35 +1,32 @@
 package mariuszbaleczny.compass;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import mariuszbaleczny.compass.Custom.CompassView;
-import mariuszbaleczny.compass.Custom.CoordinateTextWatcher;
-import mariuszbaleczny.compass.Custom.CustomEditText;
-import mariuszbaleczny.compass.Custom.CustomEditTextActionEditor;
+import mariuszbaleczny.compass.custom.CompassView;
+import mariuszbaleczny.compass.custom.CoordinateTextWatcher;
+import mariuszbaleczny.compass.custom.CustomEditText;
+import mariuszbaleczny.compass.custom.CustomEditTextActionEditor;
 
 public class CompassFragment extends Fragment implements CompassToLocationProvider.CompassToLocationListener,
         CoordinateTextWatcher.OnCoordinateChangeListener {
 
     public static final String FRAGMENT_TAG = "CompassFragment";
-    private final static String LOCATION_PROVIDER = "LocationProvider";
+    private static final String LOCATION_PROVIDER = "LocationProvider";
     private static final int REQUEST_CODE_SETTINGS = 0;
-
     private CompassView compassView;
     private TextView titleTextView;
     private TextView subtitleTextView;
@@ -37,10 +34,8 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     private TextInputLayout longitudeTextInputLayout;
     private CustomEditText latitudeEditText;
     private CustomEditText longitudeEditText;
-
     private CompassToLocationProvider compassToLocationProvider;
     private Location targetLocation;
-
     private View.OnClickListener subtitleOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -56,10 +51,10 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_compass, container, false);
 
-        setupCompassAndTextView(view);
-        setCoordinatesEditTextEnabled(false);
+        setupLayoutElements(view);
         compassSensorPresenceTestAndSetup();
         setupCoordinatesInputField(view);
+        setCoordinatesEditTextEnabled(false);
 
         return view;
     }
@@ -75,16 +70,29 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     @Override
     public void onPause() {
         super.onPause();
-        compassToLocationProvider.stopIfStarted();
+        if (compassToLocationProvider != null) {
+            compassToLocationProvider.stopIfStarted();
+        }
     }
 
-    private void setupCompassAndTextView(View v) {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        setRetainInstance(true);
+    }
+
+    private void setupLayoutElements(View v) {
         ImageView compassNeedleView = (ImageView) v.findViewById(R.id.fragment_compass_needle);
         ImageView compassRoseView = (ImageView) v.findViewById(R.id.fragment_compass_rose);
         compassView = new CompassView(compassRoseView, compassNeedleView);
 
         titleTextView = (TextView) v.findViewById(R.id.fragment_compass_title_text_view);
         subtitleTextView = (TextView) v.findViewById(R.id.fragment_compass_subtitle_text_view);
+
+        latitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_latitude_edit_text);
+        longitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_longitude_edit_text);
+        latitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_latitude_text_input);
+        longitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_longitude_text_input);
     }
 
     private void setCoordinatesEditTextEnabled(boolean value) {
@@ -105,16 +113,11 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     }
 
     private void setupCoordinatesInputField(View v) {
-        latitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_latitude_text_input);
-        longitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_longitude_text_input);
-        latitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_latitude_edit_text);
-        longitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_longitude_edit_text);
-
         if (compassToLocationProvider != null) {
             CustomEditTextActionEditor latitudeEditTextActionEditor = new CustomEditTextActionEditor(
-                    getActivity(), latitudeEditText, longitudeEditText, compassToLocationProvider, true);
+                    getActivity(), longitudeEditText, compassToLocationProvider);
             CustomEditTextActionEditor longitudeEditTextActionEditor = new CustomEditTextActionEditor(
-                    getActivity(), latitudeEditText, longitudeEditText, compassToLocationProvider, false);
+                    getActivity(), latitudeEditText, compassToLocationProvider);
 
             latitudeEditText.setOnEditorActionListener(latitudeEditTextActionEditor);
             longitudeEditText.setOnEditorActionListener(longitudeEditTextActionEditor);
@@ -130,13 +133,14 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     }
 
     private void setupLayoutOnLocationServicesCheckUp() {
-        if (isLocationServiceEnabled()) {
+        if (Utils.isLocationServiceEnabled(getActivity())) {
             setLayoutElementsOnProvider(true);
             setTitleTextViewTo(getString(R.string.point_north_title), Color.BLACK);
         } else {
             setLayoutElementsOnProvider(false);
             buildAndShowLocationServicesDialog();
         }
+        Toast.makeText(getActivity(), getString(R.string.calibration_info_toast), Toast.LENGTH_SHORT).show();
         compassToLocationProvider.startIfNotStarted();
     }
 
@@ -171,16 +175,6 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
                 });
 
         dialog.show();
-    }
-
-    private boolean isLocationServiceEnabled() {
-        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        try {
-            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception e) {
-            Log.e(FRAGMENT_TAG, e.getMessage());
-            return false;
-        }
     }
 
     private void setTitleTextViewTo(String text, int color) {
@@ -225,8 +219,10 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     private void clearCoordinateInputOutOfRangeError(boolean latitude) {
         if (latitude) {
             latitudeTextInputLayout.setError(null);
+            latitudeTextInputLayout.setErrorEnabled(false);
         } else {
             longitudeTextInputLayout.setError(null);
+            longitudeTextInputLayout.setErrorEnabled(false);
         }
     }
 }
