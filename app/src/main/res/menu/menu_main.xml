@@ -1,2 +1,2 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
-    tools:context="mariuszbaleczny.compass.MainActivity"></menu>
+    tools:context="mariuszbaleczny.compass.CompassActivity"></menu>

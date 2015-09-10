@@ -9,10 +9,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -21,14 +23,12 @@ import mariuszbaleczny.compass.Custom.CoordinateTextWatcher;
 import mariuszbaleczny.compass.Custom.CustomEditText;
 import mariuszbaleczny.compass.Custom.CustomEditTextActionEditor;
 
-public class MainActivity extends AppCompatActivity implements CompassToLocationProvider.CompassToLocationListener,
+public class CompassFragment extends Fragment implements CompassToLocationProvider.CompassToLocationListener,
         CoordinateTextWatcher.OnCoordinateChangeListener {
 
+    public static final String FRAGMENT_TAG = "CompassFragment";
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private static final int REQUEST_CODE_SETTINGS = 0;
-
-    private CompassToLocationProvider compassToLocationProvider;
-    private Location targetLocation;
 
     private CompassView compassView;
     private TextView titleTextView;
@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
     private CustomEditText latitudeEditText;
     private CustomEditText longitudeEditText;
 
+    private CompassToLocationProvider compassToLocationProvider;
+    private Location targetLocation;
+
     private View.OnClickListener subtitleOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -45,72 +48,85 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        init();
+    public static CompassFragment newInstance() {
+        return new CompassFragment();
     }
 
-    private void init() {
-        setupCompassAndTextView();
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_compass, container, false);
+
+        setupCompassAndTextView(view);
         setCoordinatesEditTextEnabled(false);
         compassSensorPresenceTestAndSetup();
-        setupCoordinatesInputField();
-    }
+        setupCoordinatesInputField(view);
 
-    private void compassSensorPresenceTestAndSetup() {
-        if (!Utils.isCompassSensorPresent(this)) {
-            setTitleTextViewTo(getString(R.string.compass_not_detected_title), Color.RED);
-            setSubtitleTextView("", null);
-            setCoordinatesEditTextEnabled(false);
-        } else {
-            compassToLocationProvider = new CompassToLocationProvider(this);
-            compassToLocationProvider.setCompassToLocationListener(this);
-            targetLocation = new Location(LOCATION_PROVIDER);
-        }
+        return view;
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
-        if (Utils.isCompassSensorPresent(this)) {
+        if (Utils.isCompassSensorPresent(getActivity())) {
             setupLayoutOnLocationServicesCheckUp();
         }
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         compassToLocationProvider.stopIfStarted();
     }
 
-    private void setupCompassAndTextView() {
-        ImageView compassNeedleView = (ImageView) findViewById(R.id.compass_needle);
-        ImageView compassRoseView = (ImageView) findViewById(R.id.compass_rose);
+    private void setupCompassAndTextView(View v) {
+        ImageView compassNeedleView = (ImageView) v.findViewById(R.id.fragment_compass_needle);
+        ImageView compassRoseView = (ImageView) v.findViewById(R.id.fragment_compass_rose);
         compassView = new CompassView(compassRoseView, compassNeedleView);
 
-        titleTextView = (TextView) findViewById(R.id.title_text_view);
-        subtitleTextView = (TextView) findViewById(R.id.subtitle_text_view);
+        titleTextView = (TextView) v.findViewById(R.id.fragment_compass_title_text_view);
+        subtitleTextView = (TextView) v.findViewById(R.id.fragment_compass_subtitle_text_view);
     }
 
-    private void setupCoordinatesInputField() {
-        latitudeTextInputLayout = (TextInputLayout) findViewById(R.id.latitude_text_input);
-        longitudeTextInputLayout = (TextInputLayout) findViewById(R.id.longitude_text_input);
-        latitudeEditText = (CustomEditText) findViewById(R.id.latitude_edit_text);
-        longitudeEditText = (CustomEditText) findViewById(R.id.longitude_edit_text);
+    private void setCoordinatesEditTextEnabled(boolean value) {
+        latitudeEditText.setEnabled(value);
+        longitudeEditText.setEnabled(value);
+    }
+
+    private void compassSensorPresenceTestAndSetup() {
+        if (!Utils.isCompassSensorPresent(getActivity())) {
+            setTitleTextViewTo(getString(R.string.compass_not_detected_title), Color.RED);
+            setSubtitleTextView("", null);
+            setCoordinatesEditTextEnabled(false);
+        } else {
+            compassToLocationProvider = new CompassToLocationProvider(getActivity());
+            compassToLocationProvider.setCompassToLocationListener(this);
+            targetLocation = new Location(LOCATION_PROVIDER);
+        }
+    }
+
+    private void setupCoordinatesInputField(View v) {
+        latitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_latitude_text_input);
+        longitudeTextInputLayout = (TextInputLayout) v.findViewById(R.id.fragment_compass_longitude_text_input);
+        latitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_latitude_edit_text);
+        longitudeEditText = (CustomEditText) v.findViewById(R.id.fragment_compass_longitude_edit_text);
 
         if (compassToLocationProvider != null) {
             CustomEditTextActionEditor latitudeEditTextActionEditor = new CustomEditTextActionEditor(
-                    this, latitudeEditText, longitudeEditText, compassToLocationProvider, true);
+                    getActivity(), latitudeEditText, longitudeEditText, compassToLocationProvider, true);
             CustomEditTextActionEditor longitudeEditTextActionEditor = new CustomEditTextActionEditor(
-                    this, latitudeEditText, longitudeEditText, compassToLocationProvider, false);
+                    getActivity(), latitudeEditText, longitudeEditText, compassToLocationProvider, false);
 
             latitudeEditText.setOnEditorActionListener(latitudeEditTextActionEditor);
             longitudeEditText.setOnEditorActionListener(longitudeEditTextActionEditor);
             latitudeEditText.addTextChangedListener(new CoordinateTextWatcher(true, this));
             longitudeEditText.addTextChangedListener(new CoordinateTextWatcher(false, this));
         }
+    }
+
+    @Override
+    public void onCompassPointerRotate(int roseAngle, int needleAngle) {
+        compassView.rotateRose(roseAngle);
+        compassView.rotateNeedle(needleAngle);
     }
 
     private void setupLayoutOnLocationServicesCheckUp() {
@@ -125,12 +141,6 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
     }
 
     @Override
-    public void onCompassPointerRotate(int roseAngle, int needleAngle) {
-        compassView.rotateRose(roseAngle);
-        compassView.rotateNeedle(needleAngle);
-    }
-
-    @Override
     public void setLayoutElementsOnProvider(boolean enabled) {
         setCoordinatesEditTextEnabled(enabled);
         if (enabled) {
@@ -140,33 +150,8 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
         }
     }
 
-    private void setSubtitleTextView(String text, View.OnClickListener onClickListener) {
-        subtitleTextView.setText(text);
-        subtitleTextView.setOnClickListener(onClickListener);
-    }
-
-    private void setCoordinatesEditTextEnabled(boolean value) {
-        latitudeEditText.setEnabled(value);
-        longitudeEditText.setEnabled(value);
-    }
-
-    private void setTitleTextViewTo(String text, int color) {
-        titleTextView.setText(text);
-        titleTextView.setTextColor(color);
-    }
-
-    private boolean isLocationServiceEnabled() {
-        LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        try {
-            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception e) {
-            Log.e(getClass().getName(), e.getMessage());
-            return false;
-        }
-    }
-
     private void buildAndShowLocationServicesDialog() {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
 
         dialog.setTitle(getString(R.string.title_alert_dialog));
         dialog.setMessage(getString(R.string.message_alert_dialog));
@@ -186,6 +171,26 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
                 });
 
         dialog.show();
+    }
+
+    private boolean isLocationServiceEnabled() {
+        LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        try {
+            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception e) {
+            Log.e(FRAGMENT_TAG, e.getMessage());
+            return false;
+        }
+    }
+
+    private void setTitleTextViewTo(String text, int color) {
+        titleTextView.setText(text);
+        titleTextView.setTextColor(color);
+    }
+
+    private void setSubtitleTextView(String text, View.OnClickListener onClickListener) {
+        subtitleTextView.setText(text);
+        subtitleTextView.setOnClickListener(onClickListener);
     }
 
     @Override
