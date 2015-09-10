@@ -12,7 +12,7 @@
     tools:context="mariuszbaleczny.compass.MainActivity">
 
     <LinearLayout
-        android:id="@+id/innerLinearLayout"
+        android:id="@+id/titles_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="2"
@@ -20,17 +20,18 @@
         android:weightSum="2">
 
         <TextView
-            android:id="@+id/titleTextView"
+            android:id="@+id/title_text_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="center"
             android:layout_weight="1"
+            android:textSize="@dimen/title_text_size"
             android:gravity="center_vertical|center_horizontal"
             android:text="@string/point_north_title"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
         <TextView
-            android:id="@+id/subtitleTextView"
+            android:id="@+id/subtitle_text_view"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_gravity="top"
@@ -38,16 +39,18 @@
             android:gravity="top|center_horizontal"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
+            android:textSize="@dimen/subtitle_text_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:visibility="visible" />
 
     </LinearLayout>
 
     <RelativeLayout
+        android:id="@+id/compass_relative_layout"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_gravity="center"
-        android:layout_weight="7">
+        android:layout_weight="6">
 
         <ImageView
             android:id="@+id/compass_rose"
@@ -56,7 +59,7 @@
             android:src="@drawable/compass_rose" />
 
         <ImageView
-            android:id="@+id/compass_pointer"
+            android:id="@+id/compass_needle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:src="@drawable/compass_needle" />
@@ -64,24 +67,28 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout"
+        android:id="@+id/coordinates_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="2"
         android:baselineAligned="false"
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="2"
+        android:layout_gravity="center"
+        android:gravity="center">
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/latitude_text_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_vertical|start">
+            android:gravity="center_vertical|start"
+            android:layout_gravity="center">
 
-            <mariuszbaleczny.compass.CustomEditText
-                android:id="@+id/latitudeMainActivity"
+            <mariuszbaleczny.compass.Custom.CustomEditText
+                android:id="@+id/latitude_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -95,13 +102,15 @@
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
+            android:id="@+id/longitude_text_input"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:gravity="center_horizontal|start">
+            android:gravity="center_vertical|start"
+            android:layout_gravity="center">
 
-            <mariuszbaleczny.compass.CustomEditText
-                android:id="@+id/longitudeMainActivity"
+            <mariuszbaleczny.compass.Custom.CustomEditText
+                android:id="@+id/longitude_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"

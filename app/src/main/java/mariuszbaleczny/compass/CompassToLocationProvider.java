@@ -13,60 +13,57 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CompassToLocationProvider implements SensorEventListener, LocationListener {
 
-    private final static String TAG = "CompassLocationProvider";
     private final static String LOCATION_PROVIDER = "LocationProvider";
     private final static int MEASUREMENTS_COUNT = 3;
-
+    private final LocationManager locationManager;
+    private final SensorManager sensorManager;
     private boolean providerStarted = false;
     private CompassToLocationListener compassToLocationListener;
     private Context context;
-
-    private LocationManager locationManager;
-    private SensorManager sensorManager;
-    private Sensor mAccelerometer;
-    private Sensor mMagnetometer;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
 
     private Location myLocation = new Location(LOCATION_PROVIDER);
     private Location targetLocation;
     private GeomagneticField geomagneticField;
 
-    private ArrayList<Float> measurements = new ArrayList<>();
-    private float[] mLastAccelerometer = new float[3];
-    private float[] mLastMagnetometer = new float[3];
-    private float[] mR = new float[9];
-    private float[] mOrientation = new float[3];
+    private List<Float> measurements = new ArrayList<>();
+    private float[] lastAccelerometer = new float[3];
+    private float[] lastMagnetometer = new float[3];
+    private float[] rotationMatrix = new float[9];
+    private float[] orientationVector = new float[3];
 
     private int measurementCounter = 0;
 
-    private boolean mLastAccelerometerSet = false;
-    private boolean mLastMagnetometerSet = false;
+    private boolean lastAccelerometerSet = false;
+    private boolean lastMagnetometerSet = false;
 
-    public CompassToLocationProvider(Context context) {
-        this(context, MEASUREMENTS_COUNT);
-    }
-
-    public CompassToLocationProvider(final Context context, final int numberOfMeasurements) {
+    public CompassToLocationProvider(final Context context) {
         this.context = context;
 
         this.sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
         this.locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
 
-        this.mAccelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        this.mMagnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        this.accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        this.magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
     }
 
     @Override
     public void onLocationChanged(Location location) {
         this.myLocation = location;
-        Log.d("Location", String.format("latitude: %f, longitude: %f", location.getLatitude(),
-                location.getLongitude()));
-        geomagneticField = new GeomagneticField((float) this.myLocation.getLatitude(),
+
+        Log.d(getClass().getName(), String.format("latitude: %f, longitude: %f", myLocation.getLatitude(),
+                myLocation.getLongitude()));
+
+        geomagneticField = new GeomagneticField(
+                (float) this.myLocation.getLatitude(),
                 (float) this.myLocation.getLongitude(),
                 (float) this.myLocation.getAltitude(),
-                System.currentTimeMillis());
+                myLocation.getTime());
     }
 
     @Override
@@ -76,7 +73,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderEnabled(String provider) {
         if (provider.contains(context.getString(R.string.gps_provider))) {
-            Log.d(TAG, provider + " : Location Services ON");
+            Log.d(getClass().getName(), provider + " : Location Services ON");
             compassToLocationListener.setLayoutElementsOnProvider(true);
         }
     }
@@ -84,28 +81,27 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     @Override
     public void onProviderDisabled(String provider) {
         if (provider.contains(context.getString(R.string.gps_provider))) {
-            Log.d(TAG, provider + " : Location Services OFF");
+            Log.d(getClass().getName(), provider + " : Location Services OFF");
             compassToLocationListener.setLayoutElementsOnProvider(false);
         }
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor == mAccelerometer) {
-            mLastAccelerometer = Utils.lowPassFilter(event.values.clone(), mLastAccelerometer.clone());
-            mLastAccelerometerSet = true;
-        } else if (event.sensor == mMagnetometer) {
-            mLastMagnetometer = Utils.lowPassFilter(event.values.clone(), mLastMagnetometer.clone());
-            mLastMagnetometerSet = true;
+        if (event.sensor == accelerometer) {
+            lastAccelerometer = Utils.lowPassFilter(event.values.clone(), lastAccelerometer.clone());
+            lastAccelerometerSet = true;
+        } else if (event.sensor == magnetometer) {
+            lastMagnetometer = Utils.lowPassFilter(event.values.clone(), lastMagnetometer.clone());
+            lastMagnetometerSet = true;
         }
 
-        if (mLastAccelerometerSet && mLastMagnetometerSet) {
-            SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
-            SensorManager.getOrientation(mR, mOrientation);
-            float azimuthInRadians = mOrientation[0];
+        if (lastAccelerometerSet && lastMagnetometerSet) {
+            SensorManager.getRotationMatrix(rotationMatrix, null, lastAccelerometer, lastMagnetometer);
+            SensorManager.getOrientation(rotationMatrix, orientationVector);
+            float azimuthInRadians = orientationVector[0];
 
-            float azimuthInDegrees = (int) ((Math.toDegrees(azimuthInRadians) + 360f) % 360f);
-            azimuthInDegrees = Math.round(azimuthInDegrees);
+            float azimuthInDegrees = Utils.convertRadiansToDegreesRounded(azimuthInRadians);
 
             measurements.add(measurementCounter, azimuthInDegrees);
             measurementCounter++;
@@ -134,11 +130,8 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         this.compassToLocationListener = compassToLocationListener;
     }
 
-    public void setTargetLocationCoordinates(double latitude, double longitude) {
-        targetLocation = new Location(LOCATION_PROVIDER);
-        targetLocation.setLatitude(latitude);
-        targetLocation.setLongitude(longitude);
-        compassToLocationListener.setTitleOnPointingLocation();
+    public void setTargetLocation(Location location) {
+        targetLocation = location;
     }
 
     public void resetTargetLocation() {
@@ -147,8 +140,8 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     public void startIfNotStarted() {
         if (!providerStarted) {
-            sensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
-            sensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
 
             for (final String provider : locationManager.getProviders(true)) {
                 if (LocationManager.GPS_PROVIDER.equals(provider)
@@ -157,7 +150,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
                     if (myLocation == null) {
                         myLocation = locationManager.getLastKnownLocation(provider);
                     }
-                    locationManager.requestLocationUpdates(provider, 0, 100.0f, this);
+                    locationManager.requestLocationUpdates(provider, 0, Constants.LOCATION_UPDATE_MIN_DISTANCE, this);
                 }
             }
             setProviderStarted(true);
@@ -166,8 +159,8 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     public void stopIfStarted() {
         if (providerStarted) {
-            sensorManager.unregisterListener(this, mAccelerometer);
-            sensorManager.unregisterListener(this, mMagnetometer);
+            sensorManager.unregisterListener(this, accelerometer);
+            sensorManager.unregisterListener(this, magnetometer);
             locationManager.removeUpdates(this);
             setProviderStarted(false);
         }
@@ -178,9 +171,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
     }
 
     public interface CompassToLocationListener {
-        void onCompassPointerRotate(int north, int azimuth);
-
-        void setTitleOnPointingLocation();
+        void onCompassPointerRotate(int roseAngle, int needleAngle);
 
         void setLayoutElementsOnProvider(boolean enabled);
     }

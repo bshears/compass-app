@@ -3,143 +3,45 @@ package mariuszbaleczny.compass;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
+import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
-import android.view.inputmethod.EditorInfo;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements CompassToLocationProvider.CompassToLocationListener {
+import mariuszbaleczny.compass.Custom.CompassView;
+import mariuszbaleczny.compass.Custom.CoordinateTextWatcher;
+import mariuszbaleczny.compass.Custom.CustomEditText;
+import mariuszbaleczny.compass.Custom.CustomEditTextActionEditor;
 
+public class MainActivity extends AppCompatActivity implements CompassToLocationProvider.CompassToLocationListener,
+        CoordinateTextWatcher.OnCoordinateChangeListener {
+
+    private final static String LOCATION_PROVIDER = "LocationProvider";
     private static final int REQUEST_CODE_SETTINGS = 0;
 
     private CompassToLocationProvider compassToLocationProvider;
+    private Location targetLocation;
 
-    private double currentAzimuth = 0d;
-    private double currentNorthAngle = 0d;
-    private double targetLatitude = Double.NaN;
-    private double targetLongitude = Double.NaN;
-    private boolean targetLatitudeInRange = false;
-    private boolean targetLongitudeInRange = false;
-
-    private ImageView compassPointerView;
-    private ImageView compassRoseView;
+    private CompassView compassView;
     private TextView titleTextView;
     private TextView subtitleTextView;
+    private TextInputLayout latitudeTextInputLayout;
+    private TextInputLayout longitudeTextInputLayout;
     private CustomEditText latitudeEditText;
     private CustomEditText longitudeEditText;
 
     private View.OnClickListener subtitleOnClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            setupLayoutAndCompassProvider();
-        }
-    };
-
-    private TextView.OnEditorActionListener latitudeEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                controlFocus(longitudeEditText);
-                resetTargetLocationIfEmptyTextView(v);
-                return true;
-            } else {
-                return false;
-            }
-        }
-    };
-    private TextView.OnEditorActionListener longitudeEditorActionListener = new TextView.OnEditorActionListener() {
-        @Override
-        public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                controlFocus(latitudeEditText);
-                resetTargetLocationIfEmptyTextView(v);
-                return true;
-            } else {
-                return false;
-            }
-
-        }
-    };
-
-    private void controlFocus(CustomEditText editText) {
-        if (editText.getText().length() != 0) {
-            hideKeyboard();
-        } else {
-            editText.requestFocus();
-        }
-    }
-
-    private void resetTargetLocationIfEmptyTextView(TextView v) {
-        if (v.getText().length() == 0) {
-            compassToLocationProvider.resetTargetLocation();
-        }
-    }
-
-    private TextWatcher latitudeTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (!isEmptyOrDashOrDot(s)) {
-                targetLatitude = Double.parseDouble(s.toString());
-                if (!isLatitudeInRange(targetLatitude)) {
-                    targetLatitude = Double.NaN;
-                }
-            } else {
-                targetLatitudeInRange = false;
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (targetLatitudeInRange & targetLongitudeInRange) {
-                compassToLocationProvider.setTargetLocationCoordinates(targetLatitude, targetLongitude);
-            } else {
-                compassToLocationProvider.resetTargetLocation();
-                setupLayoutAndCompassProvider();
-            }
-        }
-    };
-    private TextWatcher longitudeTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            if (!isEmptyOrDashOrDot(s)) {
-                targetLongitude = Double.parseDouble(s.toString());
-                if (!isLongitudeInRange(targetLongitude)) {
-                    targetLongitude = Double.NaN;
-                }
-            } else {
-                targetLongitudeInRange = false;
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (targetLatitudeInRange && targetLongitudeInRange) {
-                compassToLocationProvider.setTargetLocationCoordinates(targetLatitude, targetLongitude);
-            } else {
-                compassToLocationProvider.resetTargetLocation();
-                setupLayoutAndCompassProvider();
-            }
+            setupLayoutOnLocationServicesCheckUp();
         }
     };
 
@@ -147,53 +49,34 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        init();
+    }
 
-        compassPointerView = (ImageView) findViewById(R.id.compass_pointer);
-        compassRoseView = (ImageView) findViewById(R.id.compass_rose);
-        latitudeEditText = (CustomEditText) findViewById(R.id.latitudeMainActivity);
-        longitudeEditText = (CustomEditText) findViewById(R.id.longitudeMainActivity);
-        titleTextView = (TextView) findViewById(R.id.titleTextView);
-        subtitleTextView = (TextView) findViewById(R.id.subtitleTextView);
-
-        latitudeEditText.addTextChangedListener(latitudeTextWatcher);
-        longitudeEditText.addTextChangedListener(longitudeTextWatcher);
-        latitudeEditText.setOnEditorActionListener(latitudeEditorActionListener);
-        longitudeEditText.setOnEditorActionListener(longitudeEditorActionListener);
-
+    private void init() {
+        setupCompassAndTextView();
         setCoordinatesEditTextEnabled(false);
+        compassSensorPresenceTestAndSetup();
+        setupCoordinatesInputField();
+    }
 
-        compassToLocationProvider = new CompassToLocationProvider(this);
-        compassToLocationProvider.setCompassToLocationListener(this);
+    private void compassSensorPresenceTestAndSetup() {
+        if (!Utils.isCompassSensorPresent(this)) {
+            setTitleTextViewTo(getString(R.string.compass_not_detected_title), Color.RED);
+            setSubtitleTextView("", null);
+            setCoordinatesEditTextEnabled(false);
+        } else {
+            compassToLocationProvider = new CompassToLocationProvider(this);
+            compassToLocationProvider.setCompassToLocationListener(this);
+            targetLocation = new Location(LOCATION_PROVIDER);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (!isCompassSensorPresent()) {
-            setTitleTextViewTo(getString(R.string.compass_not_detected_title), Color.RED);
-            setCoordinatesEditTextEnabled(false);
-            setSubtitleTextView("", null);
-        } else {
-            setupLayoutAndCompassProvider();
+        if (Utils.isCompassSensorPresent(this)) {
+            setupLayoutOnLocationServicesCheckUp();
         }
-    }
-
-    private boolean isCompassSensorPresent() {
-        PackageManager packageManager = getPackageManager();
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
-    }
-
-    private void setupLayoutAndCompassProvider() {
-        if (isLocationServiceEnabled()) {
-            setTitleTextViewTo(getString(R.string.point_north_title), Color.BLACK);
-            setCoordinatesEditTextEnabled(true);
-            setLayoutElementsOnProvider(true);
-        } else {
-            setLayoutElementsOnProvider(false);
-            setCoordinatesEditTextEnabled(false);
-            buildAndShowLocationServicesDialog();
-        }
-        compassToLocationProvider.startIfNotStarted();
     }
 
     @Override
@@ -202,17 +85,49 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
         compassToLocationProvider.stopIfStarted();
     }
 
-    @Override
-    public void onCompassPointerRotate(int north, int azimuth) {
-        animatePointer(azimuth);
-        animateRose(north);
-        currentAzimuth = -azimuth;
-        currentNorthAngle = -north;
+    private void setupCompassAndTextView() {
+        ImageView compassNeedleView = (ImageView) findViewById(R.id.compass_needle);
+        ImageView compassRoseView = (ImageView) findViewById(R.id.compass_rose);
+        compassView = new CompassView(compassRoseView, compassNeedleView);
+
+        titleTextView = (TextView) findViewById(R.id.title_text_view);
+        subtitleTextView = (TextView) findViewById(R.id.subtitle_text_view);
+    }
+
+    private void setupCoordinatesInputField() {
+        latitudeTextInputLayout = (TextInputLayout) findViewById(R.id.latitude_text_input);
+        longitudeTextInputLayout = (TextInputLayout) findViewById(R.id.longitude_text_input);
+        latitudeEditText = (CustomEditText) findViewById(R.id.latitude_edit_text);
+        longitudeEditText = (CustomEditText) findViewById(R.id.longitude_edit_text);
+
+        if (compassToLocationProvider != null) {
+            CustomEditTextActionEditor latitudeEditTextActionEditor = new CustomEditTextActionEditor(
+                    this, latitudeEditText, longitudeEditText, compassToLocationProvider, true);
+            CustomEditTextActionEditor longitudeEditTextActionEditor = new CustomEditTextActionEditor(
+                    this, latitudeEditText, longitudeEditText, compassToLocationProvider, false);
+
+            latitudeEditText.setOnEditorActionListener(latitudeEditTextActionEditor);
+            longitudeEditText.setOnEditorActionListener(longitudeEditTextActionEditor);
+            latitudeEditText.addTextChangedListener(new CoordinateTextWatcher(true, this));
+            longitudeEditText.addTextChangedListener(new CoordinateTextWatcher(false, this));
+        }
+    }
+
+    private void setupLayoutOnLocationServicesCheckUp() {
+        if (isLocationServiceEnabled()) {
+            setLayoutElementsOnProvider(true);
+            setTitleTextViewTo(getString(R.string.point_north_title), Color.BLACK);
+        } else {
+            setLayoutElementsOnProvider(false);
+            buildAndShowLocationServicesDialog();
+        }
+        compassToLocationProvider.startIfNotStarted();
     }
 
     @Override
-    public void setTitleOnPointingLocation() {
-        setTitleTextViewTo(getString(R.string.point_location_title), Color.BLACK);
+    public void onCompassPointerRotate(int roseAngle, int needleAngle) {
+        compassView.rotateRose(roseAngle);
+        compassView.rotateNeedle(needleAngle);
     }
 
     @Override
@@ -240,59 +155,12 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
         titleTextView.setTextColor(color);
     }
 
-    private boolean isLatitudeInRange(double latitude) {
-        targetLatitudeInRange = (latitude > -90.0d && latitude < 90.0d);
-        return targetLatitudeInRange;
-    }
-
-    private boolean isLongitudeInRange(double longitude) {
-        targetLongitudeInRange = (longitude > -180.0d && longitude < 180.0d);
-        return targetLongitudeInRange;
-    }
-
-    private void hideKeyboard() {
-        View view = this.getCurrentFocus();
-        if (view != null) {
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-        }
-    }
-
-    private void animatePointer(int angle) {
-        RotateAnimation ra = new RotateAnimation(
-                (float) currentAzimuth,
-                (float) -angle,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(600);
-        ra.setFillAfter(true);
-
-        compassPointerView.startAnimation(ra);
-    }
-
-    private void animateRose(int angle) {
-        RotateAnimation ra = new RotateAnimation(
-                (float) currentNorthAngle,
-                (float) -angle,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-        ra.setDuration(600);
-        ra.setFillAfter(true);
-
-        compassRoseView.startAnimation(ra);
-    }
-
-    private boolean isEmptyOrDashOrDot(CharSequence s) {
-        return (s.length() == 0 || s.toString().equals(getString(R.string.minus_sign))
-                || s.toString().equals("") || s.toString().equals(getString(R.string.dot_sign)));
-    }
-
     private boolean isLocationServiceEnabled() {
         LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         try {
             return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            Log.e(getClass().getName(), e.getMessage());
             return false;
         }
     }
@@ -318,5 +186,42 @@ public class MainActivity extends AppCompatActivity implements CompassToLocation
                 });
 
         dialog.show();
+    }
+
+    @Override
+    public void onCoordinateChanged(boolean latitude, double coordinate) {
+        if (latitude) {
+            targetLocation.setLatitude(coordinate);
+        } else {
+            targetLocation.setLongitude(coordinate);
+        }
+        setTitleTextViewTo(getString(R.string.point_location_title), Color.BLACK);
+        compassToLocationProvider.setTargetLocation(targetLocation);
+        clearCoordinateInputOutOfRangeError(latitude);
+    }
+
+    @Override
+    public void onEmptyOrWrongInput(boolean latitude, boolean outOfRange) {
+        compassToLocationProvider.resetTargetLocation();
+        setTitleTextViewTo(getString(R.string.point_north_title), Color.BLACK);
+        if (outOfRange) {
+            setCoordinateInputOutOfRangeError(latitude);
+        }
+    }
+
+    private void setCoordinateInputOutOfRangeError(boolean latitude) {
+        if (latitude) {
+            latitudeTextInputLayout.setError(getString(R.string.error_latitude_out_of_range));
+        } else {
+            longitudeTextInputLayout.setError(getString(R.string.error_longitude_out_of_range));
+        }
+    }
+
+    private void clearCoordinateInputOutOfRangeError(boolean latitude) {
+        if (latitude) {
+            latitudeTextInputLayout.setError(null);
+        } else {
+            longitudeTextInputLayout.setError(null);
+        }
     }
 }
