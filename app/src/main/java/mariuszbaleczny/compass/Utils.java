@@ -34,11 +34,8 @@ public class Utils {
     public static float getMeasurementsAverage(int measurementsCount, List<Float> data) {
         float output = 0f;
 
-        if (data == null) {
+        if (data == null || measurementsCount <= 0) {
             return output;
-        }
-        if (measurementsCount <= 0) {
-            return 0f;
         }
 
         for (int i = 0; i < measurementsCount; i++) {
@@ -74,7 +71,7 @@ public class Utils {
     public static void hideKeyboard(View view, Context context) {
         if (view != null) {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
     }
 

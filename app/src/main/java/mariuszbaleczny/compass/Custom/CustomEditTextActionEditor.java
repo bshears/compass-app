@@ -1,6 +1,7 @@
 package mariuszbaleczny.compass.custom;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -35,7 +36,7 @@ public class CustomEditTextActionEditor implements TextView.OnEditorActionListen
     }
 
     private void controlFocus(CustomEditText editText, View view) {
-        if (editText.getText().length() != 0) {
+        if (!TextUtils.isEmpty(editText.getText())) {
             Utils.hideKeyboard(view, context);
         } else {
             editText.requestFocus();
@@ -43,7 +44,7 @@ public class CustomEditTextActionEditor implements TextView.OnEditorActionListen
     }
 
     private void resetTargetLocationIfEmptyTextView(TextView v) {
-        if (v.getText().length() == 0) {
+        if (TextUtils.isEmpty(v.getText())) {
             if (compassProvider != null) {
                 compassProvider.resetTargetLocation();
             }
