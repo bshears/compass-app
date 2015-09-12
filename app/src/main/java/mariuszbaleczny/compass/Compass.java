@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.custom;
+package mariuszbaleczny.compass;
 
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
@@ -7,43 +7,47 @@ import android.widget.ImageView;
 
 import mariuszbaleczny.compass.Constants;
 
-public class CompassView {
+public class Compass {
 
     private final ImageView compassRose;
     private final ImageView compassNeedle;
 
-    private float currentNorthAngle = 0f;
-    private float currentLocationAngle = 0f;
+    private int currentNorthAngle = 0;
+    private int currentLocationAngle = 0;
 
-    public CompassView(ImageView compassRose, ImageView compassNeedle) {
+    public Compass(ImageView compassRose, ImageView compassNeedle) {
         this.compassRose = compassRose;
         this.compassNeedle = compassNeedle;
     }
 
-    public void rotateRose(float angle) {
+    public void rotateRose(int angle) {
         RotateAnimation ra = new RotateAnimation(
-                currentNorthAngle,
-                -angle,
+                Constants.FULL_ANGLE - currentNorthAngle,
+                Constants.FULL_ANGLE - angle,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
         ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
         ra.setDuration(Constants.ANIMATION_DURATION);
+        ra.setRepeatCount(0);
         ra.setFillAfter(true);
 
-        currentNorthAngle = -angle;
+        currentNorthAngle = angle;
         compassRose.startAnimation(ra);
     }
 
-    public void rotateNeedle(float angle) {
+    public void rotateNeedle(int angle) {
         RotateAnimation ra = new RotateAnimation(
                 currentLocationAngle,
                 -angle,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
+        ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
         ra.setDuration(Constants.ANIMATION_DURATION);
+        ra.setRepeatCount(0);
         ra.setFillAfter(true);
 
         currentLocationAngle = -angle;
         compassNeedle.startAnimation(ra);
     }
+
 }

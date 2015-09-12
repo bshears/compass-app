@@ -17,13 +17,15 @@
     <string name="point_location_title">Pointing to location</string>
     <string name="compass_not_detected_title">There\'s no compass in your device</string>
 
-    <string name="touch_info_error_subtitle">Google\'s location services are off \n Touch here to learn more</string>
+    <string name="touch_info_error_subtitle">Google\'s location services are off \n Touch HERE to learn more</string>
     <string name="info_text_subtitle">Type in coordinates of specific location which needle will point to</string>
     <string name="error_latitude_out_of_range">Should be between -90 and 90</string>
     <string name="error_longitude_out_of_range">Should be between -180 and 180</string>
 
     <string name="gps_provider">gps</string>
+    <string name="passive_provider">passive</string>
     <string name="minus_sign">-</string>
     <string name="dot_sign">.</string>
+    <string name="network_provider">network</string>
 
 </resources>

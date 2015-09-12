@@ -1,19 +1,16 @@
 package mariuszbaleczny.compass.custom;
 
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 
-import mariuszbaleczny.compass.Utils;
-
-public class CoordinateTextWatcher implements TextWatcher {
+public class CustomEditTextWatcher implements TextWatcher {
 
     private final boolean latitude;
     private final OnCoordinateChangeListener listener;
-    private double coordinate;
+    private Double coordinate;
 
-    public CoordinateTextWatcher(final boolean latitude, final OnCoordinateChangeListener listener) {
+    public CustomEditTextWatcher(final boolean latitude, final OnCoordinateChangeListener listener) {
         this.latitude = latitude;
         this.listener = listener;
     }
@@ -30,25 +27,17 @@ public class CoordinateTextWatcher implements TextWatcher {
     public void afterTextChanged(Editable s) {
         try {
             coordinate = Double.parseDouble(s.toString());
-            if (!Utils.isCoordinateInRange(coordinate, latitude)) {
-                coordinate = Double.NaN;
-            }
         } catch (NumberFormatException e) {
             Log.e(getClass().getName(), e.getMessage());
+            coordinate = Double.NaN;
         }
 
         if (listener != null) {
-            if (TextUtils.isEmpty(s) || !Utils.isCoordinateInRange(coordinate, latitude)) {
-                listener.onEmptyOrWrongInput(latitude, !Utils.isCoordinateInRange(coordinate, latitude));
-            } else {
-                listener.onCoordinateChanged(latitude, coordinate);
-            }
+            listener.onCoordinateChanged(latitude, coordinate);
         }
     }
 
     public interface OnCoordinateChangeListener {
-        void onCoordinateChanged(boolean latitude, double coordinate);
-
-        void onEmptyOrWrongInput(boolean latitude, boolean outOfRange);
+        void onCoordinateChanged(boolean latitude, Double coordinate);
     }
 }

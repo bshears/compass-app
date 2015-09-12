@@ -7,43 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
-import java.util.List;
-
 public class Utils {
-
-    public static float[] lowPassFilter(float[] input, float[] output, float smoothCoefficient) {
-        float[] out;
-        if (output == null) {
-            return (input != null) ? input : new float[3];
-        }
-        if (input == null) {
-            return output;
-        }
-        out = output.clone();
-
-        try {
-            for (int i = 0; i < input.length; i++) {
-                out[i] = output[i] + smoothCoefficient * (input[i] - output[i]);
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            Log.e(Utils.class.getName(), e.getMessage());
-        }
-        return out;
-    }
-
-    public static float getMeasurementsAverage(int measurementsCount, List<Float> data) {
-        float output = 0f;
-
-        if (data == null || measurementsCount <= 0) {
-            return output;
-        }
-
-        for (int i = 0; i < measurementsCount; i++) {
-            output += data.get(i);
-        }
-
-        return output / measurementsCount;
-    }
 
     public static boolean isCoordinateInRange(double coordinate, boolean latitude) {
         if (latitude) {
@@ -58,10 +22,14 @@ public class Utils {
         return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
     }
 
-    public static boolean isLocationServiceEnabled(Context context) {
+    /**
+     * Source of location are GPS and NETWORK providers
+     */
+    public static boolean isLocationServicesEnabled(Context context) {
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         try {
-            return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            return (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                    && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
         } catch (Exception e) {
             Log.e(context.getClass().getName(), e.getMessage());
             return false;
@@ -75,7 +43,7 @@ public class Utils {
         }
     }
 
-    public static float convertRadiansToDegreesRounded(float angle) {
-        return Math.round((float) ((Math.toDegrees(angle) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE));
+    public static int convertRadiansToDegreesRounded(float angleInRadians) {
+        return Math.round((int) ((Math.toDegrees(angleInRadians) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE));
     }
 }
