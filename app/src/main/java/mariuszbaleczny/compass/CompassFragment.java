@@ -130,13 +130,13 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
 
     private void setupLayoutOnLocationServicesCheckUp() {
         if (Utils.isLocationServicesEnabled(getActivity())) {
-            setLayoutElementsOnProvider(true);
             setTitleTextView(getString(R.string.point_north_title), Color.BLACK);
             compassToLocationProvider.startIfNotStarted();
-            Toast.makeText(getActivity(), getString(R.string.calibration_info_toast), Toast.LENGTH_SHORT).show();
+            setLayoutElementsOnProvider(true);
         } else {
-            setLayoutElementsOnProvider(false);
+            setTitleTextView("", Color.BLACK);
             compassToLocationProvider.stopIfStarted();
+            setLayoutElementsOnProvider(false);
             buildAndShowLocationServicesDialog();
         }
     }
@@ -147,7 +147,6 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
         compass.rotateNeedle(needleAngle);
     }
 
-    // TODO: finish method description
     /**
      *  Method handles actions respectively for input coordinate entered in EditText.
      *  When coordinate argument is Double.NaN it means EditText field is empty, so
@@ -205,7 +204,6 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
 
     private void buildAndShowLocationServicesDialog() {
         AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity(), R.style.AlertDialogTheme);
-
         dialog.setTitle(getString(R.string.title_alert_dialog));
         dialog.setMessage(getString(R.string.message_alert_dialog));
         dialog.setPositiveButton(getString(R.string.positive_alert_dialog),

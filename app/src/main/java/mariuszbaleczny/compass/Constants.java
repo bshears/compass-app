@@ -19,4 +19,6 @@ public class Constants {
     public static final long MIN_UPDATE_INTERVAL_MS = 30 * SECOND_IN_MS;
 
     public static final int ON_BACK_PRESS_DELAY_TIME = 2000;
+
+    public static final int TOAST_XY_OFFSET = 0;
 }

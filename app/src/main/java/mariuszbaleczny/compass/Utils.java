@@ -17,6 +17,10 @@ public class Utils {
         }
     }
 
+    public static int convertRadiansToDegreesRounded(float angleInRadians) {
+        return Math.round((int) ((Math.toDegrees(angleInRadians) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE));
+    }
+
     public static boolean isCompassSensorPresent(Context context) {
         PackageManager packageManager = context.getPackageManager();
         return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
@@ -41,9 +45,5 @@ public class Utils {
             InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
-    }
-
-    public static int convertRadiansToDegreesRounded(float angleInRadians) {
-        return Math.round((int) ((Math.toDegrees(angleInRadians) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE));
     }
 }

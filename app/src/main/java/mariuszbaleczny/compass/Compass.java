@@ -5,8 +5,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
-import mariuszbaleczny.compass.Constants;
-
 public class Compass {
 
     private final ImageView compassRose;
@@ -22,8 +20,8 @@ public class Compass {
 
     public void rotateRose(int angle) {
         RotateAnimation ra = new RotateAnimation(
-                Constants.FULL_ANGLE - currentNorthAngle,
-                Constants.FULL_ANGLE - angle,
+                currentNorthAngle,
+                -angle,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE,
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
         ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
@@ -31,7 +29,7 @@ public class Compass {
         ra.setRepeatCount(0);
         ra.setFillAfter(true);
 
-        currentNorthAngle = angle;
+        currentNorthAngle = -angle;
         compassRose.startAnimation(ra);
     }
 

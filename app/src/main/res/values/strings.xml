@@ -6,12 +6,12 @@
     <string name="longitude_edit_text">Longitude</string>
 
     <string name="title_alert_dialog">Use Google\'s location service?</string>
-    <string name="message_alert_dialog">Let the app determine location and point compass to specific location</string>
+    <string name="message_alert_dialog">Let the app determine location and point compass to specific location.</string>
     <string name="negative_alert_dialog">DISMISS</string>
     <string name="positive_alert_dialog">AGREE</string>
 
-    <string name="calibration_info_toast">Calibrate the magnetic sensor (figure 8 pattern)</string>
-    <string name="press_again_to_exit_toast">Press back again to exit</string>
+    <string name="calibration_toast">Wave the phone in a figure 8 motion to calibrate.</string>
+    <string name="press_again_to_exit_toast">Press back again to exit.</string>
 
     <string name="point_north_title">Pointing to the North Pole</string>
     <string name="point_location_title">Pointing to location</string>
@@ -27,5 +27,6 @@
     <string name="minus_sign">-</string>
     <string name="dot_sign">.</string>
     <string name="network_provider">network</string>
+    <string name="calibrate">Calibrate</string>
 
 </resources>
