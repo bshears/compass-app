@@ -23,10 +23,11 @@
     <string name="error_longitude_out_of_range">Should be between -180 and 180</string>
 
     <string name="gps_provider">gps</string>
-    <string name="passive_provider">passive</string>
+    <string name="network_provider">network</string>
+
     <string name="minus_sign">-</string>
     <string name="dot_sign">.</string>
-    <string name="network_provider">network</string>
+
     <string name="calibrate">Calibrate</string>
 
 </resources>
