@@ -7,7 +7,7 @@ import android.test.UiThreadTest;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import mariuszbaleczny.compass.custom.CustomEditText;
+import mariuszbaleczny.compass.xustom.CustomEditText;
 
 public class CompassActivityTest extends ActivityInstrumentationTestCase2<CompassActivity> {
 
@@ -89,7 +89,7 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
                 longitudeEditText.setText("17");
             }
         });
-
+        instrumentation.waitForIdleSync();
         assertEquals(compassActivity.getString(R.string.point_location_title), titleTextView.getText().toString());
     }
 
