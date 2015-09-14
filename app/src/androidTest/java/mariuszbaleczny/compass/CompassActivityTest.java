@@ -7,7 +7,7 @@ import android.test.UiThreadTest;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import mariuszbaleczny.compass.xustom.CustomEditText;
+import mariuszbaleczny.compass.custom.CustomEditText;
 
 public class CompassActivityTest extends ActivityInstrumentationTestCase2<CompassActivity> {
 

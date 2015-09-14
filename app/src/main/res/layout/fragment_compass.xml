@@ -87,7 +87,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical|start">
 
-            <mariuszbaleczny.compass.xustom.CustomEditText
+            <mariuszbaleczny.compass.custom.CustomEditText
                 android:id="@+id/fragment_compass_latitude_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -109,7 +109,7 @@
             android:layout_weight="1"
             android:gravity="center_vertical|start">
 
-            <mariuszbaleczny.compass.xustom.CustomEditText
+            <mariuszbaleczny.compass.custom.CustomEditText
                 android:id="@+id/fragment_compass_longitude_edit_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

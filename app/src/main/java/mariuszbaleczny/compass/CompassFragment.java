@@ -15,9 +15,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import mariuszbaleczny.compass.xustom.CustomEditText;
-import mariuszbaleczny.compass.xustom.CustomEditTextActionEditor;
-import mariuszbaleczny.compass.xustom.CustomEditTextWatcher;
+import mariuszbaleczny.compass.custom.CustomEditText;
+import mariuszbaleczny.compass.custom.CustomEditTextActionEditor;
+import mariuszbaleczny.compass.custom.CustomEditTextWatcher;
 import mariuszbaleczny.compass.location.CompassToLocationProvider;
 import mariuszbaleczny.compass.location.LocationHelper;
 
