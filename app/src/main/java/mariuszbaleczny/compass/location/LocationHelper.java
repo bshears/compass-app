@@ -34,7 +34,7 @@ public class LocationHelper {
     }
 
     public boolean setLatitude(Double latitude) {
-        if(latitude != null) {
+        if (latitude != null) {
             latitudeCorrect = Utils.isCoordinateInRange(latitude, true);
             this.latitude = latitudeCorrect ? latitude : Double.NaN;
         }
@@ -42,7 +42,7 @@ public class LocationHelper {
     }
 
     public boolean setLongitude(Double longitude) {
-        if(longitude != null) {
+        if (longitude != null) {
             longitudeCorrect = Utils.isCoordinateInRange(longitude, false);
             this.longitude = longitudeCorrect ? longitude : Double.NaN;
         }
