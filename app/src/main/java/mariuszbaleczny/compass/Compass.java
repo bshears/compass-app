@@ -26,7 +26,6 @@ public class Compass {
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
         ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
         ra.setDuration(Constants.ANIMATION_DURATION);
-        ra.setRepeatCount(0);
         ra.setFillAfter(true);
 
         currentNorthAngle = -angle;
@@ -41,7 +40,6 @@ public class Compass {
                 Animation.RELATIVE_TO_SELF, Constants.ANIMATION_PIVOT_XY_VALUE);
         ra.setInterpolator(new DecelerateInterpolator(Constants.ANIMATION_INTERPOLATOR_DECELERATION));
         ra.setDuration(Constants.ANIMATION_DURATION);
-        ra.setRepeatCount(0);
         ra.setFillAfter(true);
 
         currentLocationAngle = -angle;

@@ -27,7 +27,7 @@ public class Utils {
     }
 
     /**
-     * Source of location are GPS and NETWORK providers
+     * Source of location are GPS and NETWORK providers as it provides high accuracy
      */
     public static boolean isLocationServicesEnabled(Context context) {
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);

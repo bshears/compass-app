@@ -9,9 +9,9 @@ public class Constants {
     public static final double LONGITUDE_MAX = 180.0d;
     public static final double LONGITUDE_MIN = -180.0d;
 
-    public static final long ANIMATION_DURATION = 700;
+    public static final long ANIMATION_DURATION = 1000;
     public static final float ANIMATION_PIVOT_XY_VALUE = 0.5f;
-    public static final float ANIMATION_INTERPOLATOR_DECELERATION = 100f;
+    public static final float ANIMATION_INTERPOLATOR_DECELERATION = 10f;
 
     public static final float FULL_ANGLE = 360f;
     public static final float MIN_DISTANCE_UPDATE_IN_METERS = 10f;
@@ -20,5 +20,4 @@ public class Constants {
 
     public static final int ON_BACK_PRESS_DELAY_TIME = 2000;
 
-    public static final int TOAST_XY_OFFSET = 0;
 }

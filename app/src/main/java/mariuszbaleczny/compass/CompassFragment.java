@@ -14,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import mariuszbaleczny.compass.custom.CustomEditText;
 import mariuszbaleczny.compass.custom.CustomEditTextActionEditor;
@@ -181,7 +180,7 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
             setTitleTextView(getString(R.string.point_location_title), Color.BLACK);
             clearCoordinateInputOutOfRangeError(latitude);
         }
-        // correct location doesn't mean that input value is incorrect!
+        // incorrect location doesn't mean that input value is incorrect!
         if (!Utils.isCoordinateInRange(coordinate, latitude)) {
             onEmptyOrWrongInput(latitude, true);
         }
