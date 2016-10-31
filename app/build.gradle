@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 apply plugin: 'me.tatarka.retrolambda'
 
 def libraries = rootProject.ext.libraries
@@ -25,9 +26,8 @@ android {
         }
     }
 
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
     }
 
 }
@@ -35,6 +35,7 @@ android {
 dependencies {
 
     compile "com.android.support:design:$libraries.android_support"
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$libraries.kotlin_version"
 
     testCompile "junit:junit:$libraries.junit"
     testCompile "org.mockito:mockito-core:$libraries.mockito"
