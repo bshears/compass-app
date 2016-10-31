@@ -1,35 +1,49 @@
 apply plugin: 'com.android.application'
+apply plugin: 'me.tatarka.retrolambda'
+
+def libraries = rootProject.ext.libraries
+def configuration = rootProject.ext.configuration
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "22.0.1"
+
+    compileSdkVersion configuration.compileSdkVersion
+    buildToolsVersion configuration.buildToolsVersion
+
     defaultConfig {
-        applicationId "mariuszbaleczny.compass"
-        minSdkVersion 14
-        targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        applicationId configuration.package
+        minSdkVersion configuration.minSdkVersion
+        targetSdkVersion configuration.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        testInstrumentationRunner configuration.testInstrumentationRunner
     }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile 'com.android.support:design:23.0.1'
 
-    testCompile 'junit:junit:4.12'
-    testCompile 'org.mockito:mockito-core:1.10.19'
-    testCompile 'org.hamcrest:hamcrest-library:1.1'
+    compile "com.android.support:design:$libraries.android_support"
 
-    androidTestCompile 'junit:junit:4.12'
-    androidTestCompile 'org.mockito:mockito-core:1.10.19'
-    androidTestCompile 'com.android.support:support-annotations:23.0.1'
-    androidTestCompile 'com.android.support.test:runner:0.3'
-    androidTestCompile 'com.android.support.test:rules:0.3'
+    testCompile "junit:junit:$libraries.junit"
+    testCompile "org.mockito:mockito-core:$libraries.mockito"
+    testCompile "org.hamcrest:hamcrest-library:$libraries.hamcrest"
+
+    androidTestCompile "junit:junit:$libraries.junit"
+    androidTestCompile "org.mockito:mockito-core:$libraries.mockito"
+    androidTestCompile "com.android.support:support-annotations:$libraries.android_support"
+    androidTestCompile "com.android.support.test:runner:$libraries.android_support_test"
+    androidTestCompile "com.android.support.test:rules:$libraries.android_support_test"
+
 }

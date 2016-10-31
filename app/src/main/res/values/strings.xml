@@ -29,5 +29,7 @@
     <string name="dot_sign">.</string>
 
     <string name="calibrate">Calibrate</string>
+    <string name="compass_rose_image_description">Indicates the North Pole</string>
+    <string name="compass_needle_image_description">Direction indicator</string>
 
 </resources>

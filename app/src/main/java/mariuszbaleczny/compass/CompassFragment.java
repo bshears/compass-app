@@ -1,6 +1,5 @@
 package mariuszbaleczny.compass;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
@@ -27,11 +26,6 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     public static final String FRAGMENT_TAG = "CompassFragment";
     private static final String LOCATION_PROVIDER = "LocationProvider";
     private static final int REQUEST_CODE_SETTINGS = 0;
-
-    public static CompassFragment newInstance() {
-        return new CompassFragment();
-    }
-
     private LocationHelper customTargetLocation;
     private Compass compass;
     private TextView titleTextView;
@@ -40,15 +34,11 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     private TextInputLayout longitudeTextInputLayout;
     private CustomEditText latitudeEditText;
     private CustomEditText longitudeEditText;
-
     private CompassToLocationProvider compassToLocationProvider;
 
-    private View.OnClickListener subtitleOnClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            setupLayoutOnLocationServicesCheckUp();
-        }
-    };
+    public static CompassFragment newInstance() {
+        return new CompassFragment();
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -147,15 +137,16 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     }
 
     /**
-     *  Method handles actions respectively for input coordinate entered in EditText.
-     *  When coordinate argument is Double.NaN it means EditText field is empty, so
-     *  error will be disabled and target location set to null (reset).
-     *  Proper coordinate argument will be set to customTargetLocation and its Location
-     *  will be passed to compassToLocationProvider. Passing a null will cause resetting
-     *  targetLocation, which is intended.
-     *  Sets TitleTextView and coordinates EditTexts errors status.
-     *  @param latitude   indicates whether coordinate is latitude or longitude coordinate
-     *  @param coordinate represents value of coordinate in Double
+     * Method handles actions respectively for input coordinate entered in EditText.
+     * When coordinate argument is Double.NaN it means EditText field is empty, so
+     * error will be disabled and target location set to null (reset).
+     * Proper coordinate argument will be set to customTargetLocation and its Location
+     * will be passed to compassToLocationProvider. Passing a null will cause resetting
+     * targetLocation, which is intended.
+     * Sets TitleTextView and coordinates EditTexts errors status.
+     *
+     * @param latitude   indicates whether coordinate is latitude or longitude coordinate
+     * @param coordinate represents value of coordinate in Double
      */
     @Override
     public void onCoordinateChanged(boolean latitude, Double coordinate) {
@@ -197,7 +188,7 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
             }
         } else {
             setTitleTextView(getString(R.string.point_north_title), Color.BLACK);
-            setSubtitleTextView(getString(R.string.touch_info_error_subtitle), subtitleOnClickListener);
+            setSubtitleTextView(getString(R.string.touch_info_error_subtitle), v -> setupLayoutOnLocationServicesCheckUp());
         }
     }
 
@@ -206,18 +197,12 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
         dialog.setTitle(getString(R.string.title_alert_dialog));
         dialog.setMessage(getString(R.string.message_alert_dialog));
         dialog.setPositiveButton(getString(R.string.positive_alert_dialog),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivityForResult(myIntent, REQUEST_CODE_SETTINGS);
-                    }
+                (paramDialogInterface, paramInt) -> {
+                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                    startActivityForResult(myIntent, REQUEST_CODE_SETTINGS);
                 });
         dialog.setNegativeButton(getString(R.string.negative_alert_dialog),
-                new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                    }
+                (paramDialogInterface, paramInt) -> {
                 });
 
         dialog.show();

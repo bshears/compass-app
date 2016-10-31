@@ -8,7 +8,6 @@ public class CustomEditTextWatcher implements TextWatcher {
 
     private final boolean latitude;
     private final OnCoordinateChangeListener listener;
-    private Double coordinate;
 
     public CustomEditTextWatcher(final boolean latitude, final OnCoordinateChangeListener listener) {
         this.latitude = latitude;
@@ -25,6 +24,7 @@ public class CustomEditTextWatcher implements TextWatcher {
 
     @Override
     public void afterTextChanged(Editable s) {
+        Double coordinate;
         try {
             coordinate = Double.parseDouble(s.toString());
         } catch (NumberFormatException e) {

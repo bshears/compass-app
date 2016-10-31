@@ -2,6 +2,7 @@ package mariuszbaleczny.compass;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +23,7 @@ public class CompassActivity extends AppCompatActivity {
         showFragmentIfNotExist(CompassFragment.newInstance(), CompassFragment.FRAGMENT_TAG, false);
     }
 
-    public void showFragmentIfNotExist(final Fragment fragment, final String tag, final boolean addToBackStack) {
+    private void showFragmentIfNotExist(final Fragment fragment, final String tag, final boolean addToBackStack) {
         final Fragment existingFragment = getSupportFragmentManager().findFragmentById(R.id.container);
 
         if (isNullOrEqualsTo(fragment, existingFragment)) {
@@ -35,6 +36,7 @@ public class CompassActivity extends AppCompatActivity {
         }
     }
 
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
@@ -61,15 +63,16 @@ public class CompassActivity extends AppCompatActivity {
         pressBackAgainToExit = true;
         showToastIfInvisible(getString(R.string.press_again_to_exit_toast));
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                pressBackAgainToExit = false;
-            }
-        }, Constants.ON_BACK_PRESS_DELAY_TIME);
+        new Handler().postDelayed(() -> pressBackAgainToExit = false, Constants.ON_BACK_PRESS_DELAY_TIME);
     }
 
-    public void showToastIfInvisible(CharSequence text) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    private void showToastIfInvisible(CharSequence text) {
         if (isToastNullOrInvisible()) {
             compassToast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
             compassToast.show();
