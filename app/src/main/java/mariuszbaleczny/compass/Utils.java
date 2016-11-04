@@ -21,7 +21,7 @@ public class Utils {
         return Math.round((int) ((Math.toDegrees(angleInRadians) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE));
     }
 
-    static boolean isCompassSensorPresent(Context context) {
+    public static boolean isCompassSensorPresent(Context context) {
         PackageManager packageManager = context.getPackageManager();
         return packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS);
     }
@@ -29,7 +29,7 @@ public class Utils {
     /**
      * Source of location are GPS and NETWORK providers as it provides high accuracy
      */
-    static boolean isLocationServicesEnabled(Context context) {
+    public static boolean isLocationServicesEnabled(Context context) {
         LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         try {
             return (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
@@ -46,4 +46,12 @@ public class Utils {
             imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
         }
     }
+
+    public static boolean areGranted(int[] grantResults) {
+        for (int result : grantResults) {
+            if (result != PackageManager.PERMISSION_GRANTED) return false;
+        }
+        return true;
+    }
+
 }

@@ -15,13 +15,19 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import mariuszbaleczny.compass.CompassActivityK;
 import mariuszbaleczny.compass.Constants;
 import mariuszbaleczny.compass.R;
 import mariuszbaleczny.compass.Utils;
 
 public class CompassToLocationProvider implements SensorEventListener, LocationListener {
 
+    public static final int LOC_PERMISSION_ON_STOP_REQUEST_CODE = 101;
+    public static final int LOC_PERMISSION_ON_START_REQUEST_CODE = 100;
+
     private final static String LOCATION_PROVIDER = "LocationProvider";
+    private static final String[] COMPASS_PERMISSIONS = new String[]{Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION};
 
     private final Context context;
     private final LocationManager locationManager;
@@ -67,6 +73,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
+        // TODO: implement actions
     }
 
     @Override
@@ -90,6 +97,7 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // TODO: implement actions
     }
 
     public void setTargetLocation(Location location) {
@@ -129,20 +137,16 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
         if (!providerStarted) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME);
 
+            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions((CompassActivityK) context, COMPASS_PERMISSIONS, LOC_PERMISSION_ON_START_REQUEST_CODE);
+                return;
+            }
+
             for (final String provider : locationManager.getProviders(true)) {
                 if (LocationManager.GPS_PROVIDER.equals(provider) ||
                         LocationManager.NETWORK_PROVIDER.equals(provider)) {
                     if (myLocation == null) {
-                        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            // TODO: Consider calling
-                            //    ActivityCompat#requestPermissions
-                            // here to request the missing permissions, and then overriding
-                            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                            //                                          int[] grantResults)
-                            // to handle the case where the user grants the permission. See the documentation
-                            // for ActivityCompat#requestPermissions for more details.
-                            return;
-                        }
                         myLocation = locationManager.getLastKnownLocation(provider);
                     }
                     locationManager.requestLocationUpdates(provider, Constants.MIN_UPDATE_INTERVAL_MS,
@@ -155,6 +159,10 @@ public class CompassToLocationProvider implements SensorEventListener, LocationL
 
     public void stopIfStarted() {
         if (providerStarted) {
+            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
             sensorManager.unregisterListener(this, sensor);
             locationManager.removeUpdates(this);
             providerStarted = false;

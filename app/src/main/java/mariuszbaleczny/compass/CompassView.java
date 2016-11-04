@@ -5,7 +5,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 
-public class Compass {
+public class CompassView {
 
     private final ImageView compassRose;
     private final ImageView compassNeedle;
@@ -13,7 +13,7 @@ public class Compass {
     private int currentNorthAngle = 0;
     private int currentLocationAngle = 0;
 
-    public Compass(ImageView compassRose, ImageView compassNeedle) {
+    public CompassView(ImageView compassRose, ImageView compassNeedle) {
         this.compassRose = compassRose;
         this.compassNeedle = compassNeedle;
     }
