@@ -2,14 +2,28 @@ package mariuszbaleczny.compass;
 
 import android.app.Instrumentation;
 import android.support.design.widget.TextInputLayout;
-import android.test.ActivityInstrumentationTestCase2;
-import android.test.UiThreadTest;
+import android.support.test.rule.ActivityTestRule;
+import android.support.test.runner.AndroidJUnit4;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import mariuszbaleczny.compass.custom.CustomEditText;
 
-public class CompassActivityTest extends ActivityInstrumentationTestCase2<CompassActivity> {
+import static android.support.test.InstrumentationRegistry.getInstrumentation;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertTrue;
+
+@RunWith(AndroidJUnit4.class)
+public class CompassActivityTest extends ActivityTestRule<CompassActivity> {
+
+    @Rule
+    public ActivityTestRule<CompassActivity> rule = new ActivityTestRule<>(CompassActivity.class);
 
     private CompassActivity compassActivity;
     private Instrumentation instrumentation;
@@ -25,9 +39,8 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
         super(CompassActivity.class);
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         compassActivity = getActivity();
         instrumentation = getInstrumentation();
         latitudeEditText = (CustomEditText) compassActivity.findViewById(R.id.fragment_compass_latitude_edit_text);
@@ -50,7 +63,7 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
         assertNotNull("compassNeedle is null", compassNeedle);
     }
 
-    @UiThreadTest
+    @Test
     public void testCoordinatesEditTextFocus() {
         assertNotNull(latitudeEditText);
         assertTrue(latitudeEditText.requestFocus());
@@ -60,7 +73,7 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
         assertTrue(longitudeEditText.hasFocus());
     }
 
-    @UiThreadTest
+    @Test
     public void testCoordinatesEditTextInputValue() {
         assertTrue(latitudeEditText.requestFocus());
         latitudeEditText.setText("52");
@@ -70,7 +83,7 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
         assertEquals("17", longitudeEditText.getText().toString());
     }
 
-    @UiThreadTest
+    @Test
     public void testCoordinatesEditTextErrorOnWrongValue() {
         assertTrue(latitudeEditText.requestFocus());
         latitudeEditText.setText("200");
@@ -80,26 +93,20 @@ public class CompassActivityTest extends ActivityInstrumentationTestCase2<Compas
         assertEquals(compassActivity.getString(R.string.error_longitude_out_of_range), longitudeTextInputLayout.getError());
     }
 
-    @UiThreadTest
-    public void testTitleOnCorrectInput(){
-        compassActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                latitudeEditText.setText("52");
-                longitudeEditText.setText("17");
-            }
+    @Test
+    public void testTitleOnCorrectInput() {
+        compassActivity.runOnUiThread(() -> {
+            latitudeEditText.setText("52");
+            longitudeEditText.setText("17");
         });
         instrumentation.waitForIdleSync();
         assertEquals(compassActivity.getString(R.string.point_location_title), titleTextView.getText().toString());
     }
 
-    public void testTitleOnIncorrectInput(){
-        compassActivity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                latitudeEditText.setText("52");
-                longitudeEditText.setText("");
-            }
+    public void testTitleOnIncorrectInput() {
+        compassActivity.runOnUiThread(() -> {
+            latitudeEditText.setText("52");
+            longitudeEditText.setText("");
         });
         instrumentation.waitForIdleSync();
         assertEquals(compassActivity.getString(R.string.point_north_title), titleTextView.getText().toString());

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
@@ -27,7 +28,7 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     private static final String LOCATION_PROVIDER = "LocationProvider";
     private static final int REQUEST_CODE_SETTINGS = 0;
     private LocationHelper customTargetLocation;
-    private Compass compass;
+    private CompassView compassView;
     private TextView titleTextView;
     private TextView subtitleTextView;
     private TextInputLayout latitudeTextInputLayout;
@@ -35,6 +36,7 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     private CustomEditText latitudeEditText;
     private CustomEditText longitudeEditText;
     private CompassToLocationProvider compassToLocationProvider;
+    private boolean askedAfterStart = false;
 
     public static CompassFragment newInstance() {
         return new CompassFragment();
@@ -65,8 +67,9 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
     @Override
     public void onResume() {
         super.onResume();
-        if (Utils.isCompassSensorPresent(getActivity())) {
-            setupLayoutOnLocationServicesCheckUp();
+        if (!askedAfterStart) {
+            checkUpAndSetupLocationServices();
+            askedAfterStart = true;
         }
     }
 
@@ -78,10 +81,26 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CompassToLocationProvider.LOC_PERMISSION_ON_START_REQUEST_CODE:
+                if (Utils.areGranted(grantResults)) {
+                    compassToLocationProvider.startIfNotStarted();
+                }
+                break;
+            case CompassToLocationProvider.LOC_PERMISSION_ON_STOP_REQUEST_CODE:
+                if (Utils.areGranted(grantResults)) {
+                    compassToLocationProvider.stopIfStarted();
+                }
+                break;
+        }
+    }
+
     private void setupLayoutElements(View v) {
         ImageView compassNeedleView = (ImageView) v.findViewById(R.id.fragment_compass_needle);
         ImageView compassRoseView = (ImageView) v.findViewById(R.id.fragment_compass_rose);
-        compass = new Compass(compassRoseView, compassNeedleView);
+        compassView = new CompassView(compassRoseView, compassNeedleView);
 
         titleTextView = (TextView) v.findViewById(R.id.fragment_compass_title_text_view);
         subtitleTextView = (TextView) v.findViewById(R.id.fragment_compass_subtitle_text_view);
@@ -132,8 +151,8 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
 
     @Override
     public void onCompassPointerRotate(int roseAngle, int needleAngle) {
-        compass.rotateRose(roseAngle);
-        compass.rotateNeedle(needleAngle);
+        compassView.rotateRose(roseAngle);
+        compassView.rotateNeedle(needleAngle);
     }
 
     /**
@@ -245,6 +264,12 @@ public class CompassFragment extends Fragment implements CompassToLocationProvid
         } else {
             longitudeTextInputLayout.setError(null);
             longitudeTextInputLayout.setErrorEnabled(false);
+        }
+    }
+
+    private void checkUpAndSetupLocationServices() {
+        if (Utils.isCompassSensorPresent(getActivity())) {
+            setupLayoutOnLocationServicesCheckUp();
         }
     }
 }

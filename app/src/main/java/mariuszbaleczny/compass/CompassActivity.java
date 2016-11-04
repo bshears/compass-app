@@ -23,36 +23,20 @@ public class CompassActivity extends AppCompatActivity {
         showFragmentIfNotExist(CompassFragment.newInstance(), CompassFragment.FRAGMENT_TAG, false);
     }
 
-    private void showFragmentIfNotExist(final Fragment fragment, final String tag, final boolean addToBackStack) {
-        final Fragment existingFragment = getSupportFragmentManager().findFragmentById(R.id.container);
-
-        if (isNullOrEqualsTo(fragment, existingFragment)) {
-            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            if (addToBackStack) {
-                ft.addToBackStack(null);
-            }
-            ft.replace(R.id.container, fragment, tag);
-            ft.commit();
-        }
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return super.onCreateOptionsMenu(menu);
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_calibrate) {
-            showToastIfInvisible(getString(R.string.calibration_toast));
+            showToastIfInvisible(getString(R.string.calibration_message));
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    private boolean isNullOrEqualsTo(Fragment fragment, Fragment existingFragment) {
-        return (existingFragment == null || !fragment.getClass().equals(existingFragment.getClass()));
     }
 
     @Override
@@ -66,10 +50,21 @@ public class CompassActivity extends AppCompatActivity {
         new Handler().postDelayed(() -> pressBackAgainToExit = false, Constants.ON_BACK_PRESS_DELAY_TIME);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    private void showFragmentIfNotExist(final Fragment fragment, final String tag, final boolean addToBackStack) {
+        final Fragment existingFragment = getSupportFragmentManager().findFragmentById(R.id.container);
 
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (isNullOrEqualsTo(fragment, existingFragment)) {
+            final FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            if (addToBackStack) {
+                ft.addToBackStack(null);
+            }
+            ft.replace(R.id.container, fragment, tag);
+            ft.commit();
+        }
+    }
+
+    private boolean isNullOrEqualsTo(Fragment fragment, Fragment existingFragment) {
+        return (existingFragment == null || !fragment.getClass().equals(existingFragment.getClass()));
     }
 
     private void showToastIfInvisible(CharSequence text) {
