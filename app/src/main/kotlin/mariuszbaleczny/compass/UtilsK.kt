@@ -14,7 +14,7 @@ class UtilsK {
 
     companion object {
         fun convertRadiansToDegreesRounded(angleInRadians: Float): Int {
-            return Math.round(((Math.toDegrees(angleInRadians.toDouble()) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE).toInt().toFloat())
+            return Math.round(((Math.toDegrees(angleInRadians.toDouble()) + ConstantsK.FULL_ANGLE) % ConstantsK.FULL_ANGLE).toInt().toFloat())
         }
 
         fun isCompassSensorPresent(context: Context): Boolean {
@@ -51,11 +51,11 @@ class UtilsK {
         }
 
         fun isLatitudeInRange(value: Double): Boolean {
-            return value >= Constants.LATITUDE_MIN && value <= Constants.LATITUDE_MAX
+            return value >= ConstantsK.LATITUDE_MIN && value <= ConstantsK.LATITUDE_MAX
         }
 
         fun isLongitudeInRange(value: Double): Boolean {
-            return value >= Constants.LONGITUDE_MIN && value <= Constants.LONGITUDE_MAX
+            return value >= ConstantsK.LONGITUDE_MIN && value <= ConstantsK.LONGITUDE_MAX
         }
     }
 

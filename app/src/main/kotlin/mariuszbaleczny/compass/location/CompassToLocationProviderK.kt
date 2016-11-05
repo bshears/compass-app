@@ -11,9 +11,9 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import com.pawegio.kandroid.d
 import mariuszbaleczny.compass.CompassActivityK
-import mariuszbaleczny.compass.Constants
+import mariuszbaleczny.compass.ConstantsK
 import mariuszbaleczny.compass.R
-import mariuszbaleczny.compass.Utils
+import mariuszbaleczny.compass.UtilsK
 
 /**
  * Created by mariusz on 05.11.16.
@@ -85,8 +85,8 @@ class CompassToLocationProviderK(private val context: Context) : SensorEventList
 
     override fun onSensorChanged(event: SensorEvent) {
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values.clone())
-        val azimuthInRadians = SensorManager.getOrientation(rotationMatrix, orientationVector)[Constants.Z_AXIS_ROTATION]
-        northAngle = Utils.convertRadiansToDegreesRounded(azimuthInRadians)
+        val azimuthInRadians = SensorManager.getOrientation(rotationMatrix, orientationVector)[ConstantsK.Z_AXIS_ROTATION]
+        northAngle = UtilsK.convertRadiansToDegreesRounded(azimuthInRadians)
         updateAngle()
     }
 
@@ -105,7 +105,9 @@ class CompassToLocationProviderK(private val context: Context) : SensorEventList
     }
 
     private fun calculateTrueNorthAngleIfPossible() {
-        northAngle += geomagneticField?.declination?.toInt() as Int
+        if (geomagneticField != null) {
+            northAngle += geomagneticField?.declination?.toInt() as Int
+        }
     }
 
     private fun calculateLocationAngleIfPossible() {
@@ -129,8 +131,8 @@ class CompassToLocationProviderK(private val context: Context) : SensorEventList
             for (provider in locationManager.getProviders(true)) {
                 if (LocationManager.GPS_PROVIDER == provider || LocationManager.NETWORK_PROVIDER == provider) {
                     myLocation = locationManager.getLastKnownLocation(provider)
-                    locationManager.requestLocationUpdates(provider, Constants.MIN_UPDATE_INTERVAL_MS,
-                            Constants.MIN_DISTANCE_UPDATE_IN_METERS, this)
+                    locationManager.requestLocationUpdates(provider, ConstantsK.MIN_UPDATE_INTERVAL_MS,
+                            ConstantsK.MIN_DISTANCE_UPDATE_IN_METERS, this)
                 }
             }
             providerStarted = true
