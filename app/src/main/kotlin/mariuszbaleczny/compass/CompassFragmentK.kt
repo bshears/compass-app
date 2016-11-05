@@ -20,7 +20,7 @@ import com.pawegio.kandroid.find
 import com.pawegio.kandroid.textWatcher
 import mariuszbaleczny.compass.custom.CustomEditTextK
 import mariuszbaleczny.compass.location.CompassToLocationProvider
-import mariuszbaleczny.compass.location.LocationHelper
+import mariuszbaleczny.compass.location.LocationHelperK
 
 /**
  * Created by mariusz on 03.11.16.
@@ -37,7 +37,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         }
     }
 
-    private var locationHelper: LocationHelper? = null
+    private var locationHelper: LocationHelperK? = null
     private var compassLocationProvider: CompassToLocationProvider? = null
 
     private var compassView: CompassRotateHelper? = null
@@ -54,7 +54,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         super.onCreate(savedInstanceState)
         if (UtilsK.isCompassSensorPresent(context)) {
             setupCompassToLocationProvider()
-            locationHelper = LocationHelper(Location(COMPASS_APPLICATION))
+            locationHelper = LocationHelperK(Location(COMPASS_APPLICATION))
         }
     }
 
@@ -96,8 +96,8 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         setCoordinatesEnabled(enabled)
         if (enabled) {
             setSubtitle(R.string.info_text_subtitle, null)
-            if (locationHelper?.isCorrect as Boolean) {
-                compassLocationProvider?.setTargetLocation(locationHelper?.location)
+            if (locationHelper?.isCorrect() as Boolean) {
+                compassLocationProvider?.setTargetLocation(locationHelper?.getLocation())
                 setTitle(R.string.point_location_title, Color.BLACK)
             }
         } else {
@@ -159,9 +159,9 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         locationHelper?.setLatitude(value)
 
         // even when coordinate is out its of range, then target location will be set to null (reset)
-        compassLocationProvider?.setTargetLocation(locationHelper?.location)
+        compassLocationProvider?.setTargetLocation(locationHelper?.getLocation())
 
-        if (locationHelper?.isCorrect as Boolean) {
+        if (locationHelper?.isCorrect() as Boolean) {
             setTitle(R.string.point_location_title, Color.BLACK)
             clearLatitudeOutOfRangeError()
         }
@@ -183,9 +183,9 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         locationHelper?.setLongitude(value)
 
         // even when coordinate is out its of range, then target location will be set to null (reset)
-        compassLocationProvider?.setTargetLocation(locationHelper?.location)
+        compassLocationProvider?.setTargetLocation(locationHelper?.getLocation())
 
-        if (locationHelper?.isCorrect as Boolean) {
+        if (locationHelper?.isCorrect() as Boolean) {
             setTitle(R.string.point_location_title, Color.BLACK)
             clearLongitudeOutOfError()
         }
