@@ -19,13 +19,13 @@ import com.pawegio.kandroid.e
 import com.pawegio.kandroid.find
 import com.pawegio.kandroid.textWatcher
 import mariuszbaleczny.compass.custom.CustomEditTextK
-import mariuszbaleczny.compass.location.CompassToLocationProvider
+import mariuszbaleczny.compass.location.CompassToLocationProviderK
 import mariuszbaleczny.compass.location.LocationHelperK
 
 /**
  * Created by mariusz on 03.11.16.
  */
-class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocationListener {
+class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocationListener {
 
     companion object {
         const val COMPASS_APPLICATION: String = "compass_location_provider"
@@ -38,7 +38,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     }
 
     private var locationHelper: LocationHelperK? = null
-    private var compassLocationProvider: CompassToLocationProvider? = null
+    private var compassLocationProvider: CompassToLocationProviderK? = null
 
     private var compassView: CompassRotateHelper? = null
     private var title: TextView? = null
@@ -108,12 +108,12 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            CompassToLocationProvider.LOC_PERMISSION_ON_START_REQUEST_CODE -> {
+            CompassToLocationProviderK.LOC_PERMISSION_ON_START_REQUEST_CODE -> {
                 if (UtilsK.areGranted(grantResults)) {
                     compassLocationProvider?.startIfNotStarted()
                 }
             }
-            CompassToLocationProvider.LOC_PERMISSION_ON_STOP_REQUEST_CODE -> {
+            CompassToLocationProviderK.LOC_PERMISSION_ON_STOP_REQUEST_CODE -> {
                 if (UtilsK.areGranted(grantResults)) {
                     compassLocationProvider?.stopIfStarted()
                 }
@@ -251,7 +251,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     }
 
     private fun setupCompassToLocationProvider() {
-        compassLocationProvider = CompassToLocationProvider(context)
+        compassLocationProvider = CompassToLocationProviderK(context)
         compassLocationProvider?.setCompassToLocationListener(this)
     }
 
