@@ -40,7 +40,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     private var locationHelper: LocationHelper? = null
     private var compassLocationProvider: CompassToLocationProvider? = null
 
-    private var compassView: CompassView? = null
+    private var compassView: CompassRotateHelper? = null
     private var title: TextView? = null
     private var subtitle: TextView? = null
     private var latitude: CustomEditText? = null
@@ -244,7 +244,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     private fun setupCompassView(v: View?) {
         val needle: ImageView? = v?.find<ImageView>(R.id.fragment_compass_needle)
         val rose: ImageView? = v?.find<ImageView>(R.id.fragment_compass_rose)
-        compassView = CompassView(rose, needle)
+        compassView = CompassRotateHelper(rose, needle)
 
         rose?.setOnClickListener { checkUpAndSetupLocationServices() }
         needle?.setOnClickListener { checkUpAndSetupLocationServices() }
@@ -257,14 +257,14 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
 
     private fun setupCoordinateLayouts() {
         if (UtilsK.isCompassSensorPresent(context)) {
-            latitude?.setOnEditorActionListener({ v, id, event -> onEditorAction(longitude, v, id) })
-            longitude?.setOnEditorActionListener({ v, id, event -> onEditorAction(latitude, v, id) })
+            latitude?.setOnEditorActionListener({ v, id, event -> onCoordinateFieldAction(longitude, v, id) })
+            longitude?.setOnEditorActionListener({ v, id, event -> onCoordinateFieldAction(latitude, v, id) })
             latitude?.textWatcher { afterTextChanged { s -> onLatitudeChanged(s) } }
             longitude?.textWatcher { afterTextChanged { s -> onChangedLongitude(s) } }
         }
     }
 
-    private fun onEditorAction(complementaryField: CustomEditText?, v: TextView?, actionId: Int): Boolean {
+    private fun onCoordinateFieldAction(complementaryField: CustomEditText?, v: TextView?, actionId: Int): Boolean {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             controlFocus(complementaryField, v as View)
             return false

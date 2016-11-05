@@ -12,10 +12,6 @@ class ConstantsK {
         val LONGITUDE_MAX = 180.0
         val LONGITUDE_MIN = -180.0
 
-        val ANIMATION_DURATION: Long = 1000
-        val ANIMATION_PIVOT_XY_VALUE = 0.5f
-        val ANIMATION_INTERPOLATOR_DECELERATION = 10f
-
         val FULL_ANGLE = 360f
         val MIN_DISTANCE_UPDATE_IN_METERS = 10f
         private val SECOND_IN_MS: Long = 1000
