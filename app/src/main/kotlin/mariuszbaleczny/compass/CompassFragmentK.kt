@@ -18,7 +18,7 @@ import android.widget.TextView
 import com.pawegio.kandroid.e
 import com.pawegio.kandroid.find
 import com.pawegio.kandroid.textWatcher
-import mariuszbaleczny.compass.custom.CustomEditText
+import mariuszbaleczny.compass.custom.CustomEditTextK
 import mariuszbaleczny.compass.location.CompassToLocationProvider
 import mariuszbaleczny.compass.location.LocationHelper
 
@@ -43,8 +43,8 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     private var compassView: CompassRotateHelper? = null
     private var title: TextView? = null
     private var subtitle: TextView? = null
-    private var latitude: CustomEditText? = null
-    private var longitude: CustomEditText? = null
+    private var latitude: CustomEditTextK? = null
+    private var longitude: CustomEditTextK? = null
     private var latitudeLayout: TextInputLayout? = null
     private var longitudeLayout: TextInputLayout? = null
 
@@ -235,8 +235,8 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
     private fun setupLayoutWidgets(v: View?) {
         title = v?.find<TextView>(R.id.fragment_compass_title_text_view)
         subtitle = v?.find<TextView>(R.id.fragment_compass_subtitle_text_view)
-        latitude = v?.find<CustomEditText>(R.id.fragment_compass_latitude_edit_text)
-        longitude = v?.find<CustomEditText>(R.id.fragment_compass_longitude_edit_text)
+        latitude = v?.find<CustomEditTextK>(R.id.fragment_compass_latitude_edit_text)
+        longitude = v?.find<CustomEditTextK>(R.id.fragment_compass_longitude_edit_text)
         latitudeLayout = v?.find<TextInputLayout>(R.id.fragment_compass_latitude_text_input)
         longitudeLayout = v?.find<TextInputLayout>(R.id.fragment_compass_longitude_text_input)
     }
@@ -264,7 +264,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         }
     }
 
-    private fun onCoordinateFieldAction(complementaryField: CustomEditText?, v: TextView?, actionId: Int): Boolean {
+    private fun onCoordinateFieldAction(complementaryField: CustomEditTextK?, v: TextView?, actionId: Int): Boolean {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             controlFocus(complementaryField, v as View)
             return false
@@ -272,7 +272,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProvider.CompassToLocation
         return true
     }
 
-    private fun controlFocus(field: CustomEditText?, v: View) {
+    private fun controlFocus(field: CustomEditTextK?, v: View) {
         if (!(field?.text?.isEmpty() as Boolean)) {
             UtilsK.hideKeyboard(v, context)
             v.clearFocus()
