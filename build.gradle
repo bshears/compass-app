@@ -31,7 +31,7 @@ ext {
             package                  : 'mariuszbaleczny.compass',
             compileSdkVersion        : 24,
             targetSdkVersion         : 24,
-            minSdkVersion            : 14,
+            minSdkVersion            : 16,
             buildToolsVersion        : '24.0.2',
             testInstrumentationRunner: 'android.support.test.runner.AndroidJUnitRunner'
 

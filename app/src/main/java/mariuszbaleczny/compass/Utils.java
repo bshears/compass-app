@@ -7,8 +7,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
+import kotlin.Deprecated;
+
 public class Utils {
 
+    @Deprecated(message = "Replaced with boilerplate-free kotlin language properties")
     public static boolean isCoordinateInRange(double coordinate, boolean latitude) {
         if (latitude) {
             return (coordinate >= Constants.LATITUDE_MIN && coordinate <= Constants.LATITUDE_MAX);
@@ -52,6 +55,14 @@ public class Utils {
             if (result != PackageManager.PERMISSION_GRANTED) return false;
         }
         return true;
+    }
+
+    public static boolean isLatitudeInRange(double value) {
+        return (value >= Constants.LATITUDE_MIN && value <= Constants.LATITUDE_MAX);
+    }
+
+    public static boolean isLongitudeInRange(double value) {
+        return (value >= Constants.LONGITUDE_MIN && value <= Constants.LONGITUDE_MAX);
     }
 
 }

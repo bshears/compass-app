@@ -7,8 +7,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 
+import kotlin.Deprecated;
 import mariuszbaleczny.compass.Utils;
 
+@Deprecated(message = "Replaced with boilerplate-free kotlin language properties")
 public class CustomEditTextActionEditor implements TextView.OnEditorActionListener {
 
     private final Context context;

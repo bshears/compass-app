@@ -4,6 +4,9 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 
+import kotlin.Deprecated;
+
+@Deprecated(message = "Replaced with boilerplate-free kotlin language properties")
 public class CustomEditTextWatcher implements TextWatcher {
 
     private final boolean latitude;
