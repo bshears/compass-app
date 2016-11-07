@@ -10,7 +10,6 @@ import android.location.LocationManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import com.pawegio.kandroid.d
-import mariuszbaleczny.compass.CompassActivityK
 import mariuszbaleczny.compass.ConstantsK
 import mariuszbaleczny.compass.R
 import mariuszbaleczny.compass.UtilsK
@@ -21,11 +20,10 @@ import mariuszbaleczny.compass.UtilsK
 class CompassToLocationProviderK(private val context: Context) : SensorEventListener, LocationListener {
 
     companion object {
-        val LOC_PERMISSION_ON_STOP_REQUEST_CODE = 101
         val LOC_PERMISSION_ON_START_REQUEST_CODE = 100
 
         private val LOCATION_PROVIDER = "LocationProvider"
-        private val COMPASS_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+        val COMPASS_PERMISSIONS = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     }
 
     private val sensorManager: SensorManager
@@ -122,9 +120,10 @@ class CompassToLocationProviderK(private val context: Context) : SensorEventList
     fun startIfNotStarted() {
         if (!providerStarted) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME)
+            providerStarted = true
 
-            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(context as CompassActivityK, COMPASS_PERMISSIONS, LOC_PERMISSION_ON_START_REQUEST_CODE)
+            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
                 return
             }
 
@@ -135,18 +134,18 @@ class CompassToLocationProviderK(private val context: Context) : SensorEventList
                             ConstantsK.MIN_DISTANCE_UPDATE_IN_METERS, this)
                 }
             }
-            providerStarted = true
         }
     }
 
     fun stopIfStarted() {
         if (providerStarted) {
-            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
+            sensorManager.unregisterListener(this, sensor)
+            providerStarted = false
+            if (ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[0]) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(context, COMPASS_PERMISSIONS[1]) != PackageManager.PERMISSION_GRANTED) {
                 return
             }
-            sensorManager.unregisterListener(this, sensor)
             locationManager.removeUpdates(this)
-            providerStarted = false
         }
     }
 

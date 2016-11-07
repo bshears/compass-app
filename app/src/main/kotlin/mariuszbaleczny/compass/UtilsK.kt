@@ -3,6 +3,7 @@ package mariuszbaleczny.compass
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.support.v4.app.ActivityCompat
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import com.pawegio.kandroid.e
@@ -46,6 +47,15 @@ class UtilsK {
         fun areGranted(grantResults: IntArray): Boolean {
             for (result in grantResults) {
                 if (result != PackageManager.PERMISSION_GRANTED) return false
+            }
+            return true
+        }
+
+        fun arePermissionsGranted(context: Context, permissions: Array<String>): Boolean {
+            for (permission: String in permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false
+                }
             }
             return true
         }

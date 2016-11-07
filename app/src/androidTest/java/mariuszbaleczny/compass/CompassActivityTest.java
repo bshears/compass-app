@@ -109,7 +109,7 @@ public class CompassActivityTest extends ActivityTestRule<CompassActivity> {
             longitudeEditText.setText("");
         });
         instrumentation.waitForIdleSync();
-        assertEquals(compassActivity.getString(R.string.point_north_title), titleTextView.getText().toString());
+        assertEquals(compassActivity.getString(R.string.needle_free_mode), titleTextView.getText().toString());
     }
 
 }

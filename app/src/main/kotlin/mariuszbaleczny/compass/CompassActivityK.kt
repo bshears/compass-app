@@ -41,7 +41,7 @@ class CompassActivityK : AppCompatActivity() {
         }
         pressBackAgainToExit = true
         showToastIfInvisible(R.string.press_again_to_exit_toast)
-        Handler().postDelayed({ pressBackAgainToExit = true }, ConstantsK.ON_BACK_PRESS_DELAY_TIME.toLong())
+        Handler().postDelayed({ pressBackAgainToExit = false }, ConstantsK.ON_BACK_PRESS_DELAY_TIME.toLong())
     }
 
     private fun showFragment(fragment: Fragment, tag: String, addToBackStack: Boolean) {
@@ -64,6 +64,6 @@ class CompassActivityK : AppCompatActivity() {
         }
     }
 
-    private fun isToastVisible(): Boolean = toast?.view?.windowVisibility != View.VISIBLE
+    private fun isToastVisible(): Boolean = (toast?.view?.windowVisibility == View.VISIBLE)
 
 }

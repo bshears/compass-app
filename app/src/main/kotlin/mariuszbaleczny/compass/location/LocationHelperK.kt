@@ -29,15 +29,20 @@ class LocationHelperK(private val location: Location) {
     fun setLatitude(latitude: Double?) {
         if (latitude != null) {
             latitudeCorrect = UtilsK.isLatitudeInRange(latitude)
-            this.latitude = if (latitudeCorrect) latitude else java.lang.Double.NaN
+            this.latitude = if (latitudeCorrect) latitude else Double.NaN
         }
     }
 
     fun setLongitude(longitude: Double?) {
         if (longitude != null) {
             longitudeCorrect = UtilsK.isLongitudeInRange(longitude)
-            this.longitude = if (longitudeCorrect) longitude else java.lang.Double.NaN
+            this.longitude = if (longitudeCorrect) longitude else Double.NaN
         }
+    }
+
+    fun setIncorrect() {
+        latitudeCorrect = false
+        longitudeCorrect = false
     }
 
 }
