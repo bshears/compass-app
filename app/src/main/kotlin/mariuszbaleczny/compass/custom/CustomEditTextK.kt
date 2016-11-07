@@ -8,13 +8,9 @@ import android.widget.EditText
 /**
  * Created by mariusz on 05.11.16.
  */
-class CustomEditTextK(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) :
-        EditText(context, attrs, defStyleAttr) {
+class CustomEditTextK(context: Context?, attr: AttributeSet?) : EditText(context, attr) {
 
-    constructor(context: Context?) : this(context, null, 0) {
-    }
-
-    constructor(context: Context?, attrs: AttributeSet?) : this(context, attrs, 0) {
+    constructor(context: Context?) : this(context, null) {
     }
 
     override fun onKeyPreIme(keyCode: Int, event: KeyEvent?): Boolean {
