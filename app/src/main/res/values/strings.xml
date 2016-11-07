@@ -13,7 +13,7 @@
     <string name="calibration_message">Wave the phone in a figure 8 motion to calibrate.</string>
     <string name="press_again_to_exit_toast">Press back again to exit.</string>
 
-    <string name="point_north_title">Pointing to the North Pole</string>
+    <string name="needle_free_mode">Needle free mode</string>
     <string name="point_location_title">Pointing to location</string>
     <string name="compass_not_detected_title">There\'s no compassView in your device</string>
 

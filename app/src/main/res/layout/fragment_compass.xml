@@ -9,7 +9,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:weightSum="10"
-    tools:context="mariuszbaleczny.compass.CompassFragment">
+    tools:context="mariuszbaleczny.compass.CompassActivityK">
 
     <LinearLayout
         android:id="@+id/fragment_compass_titles_linear_layout"
@@ -26,7 +26,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center_vertical|center_horizontal"
-            android:text="@string/point_north_title"
+            android:text="@string/needle_free_mode"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textSize="@dimen/title_text_size" />
 
