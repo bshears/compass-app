@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'me.tatarka.retrolambda'
 
 def libraries = rootProject.ext.libraries
 def configuration = rootProject.ext.configuration
@@ -28,8 +27,13 @@ android {
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+        test.java.srcDirs += 'src/test/kotlin'
     }
 
+}
+
+kapt {
+    generateStubs = true
 }
 
 dependencies {
@@ -38,7 +42,13 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$libraries.kotlin_version"
     compile "com.pawegio.kandroid:kandroid:0.6.14@aar"
 
+    kapt "com.google.dagger:dagger-compiler:$libraries.dagger_version"
+    compile "com.google.dagger:dagger:$libraries.dagger_version"
+    provided "javax.annotation:jsr250-api:$libraries.jsr250_version"
+
     testCompile "junit:junit:$libraries.junit"
+    testCompile "org.jetbrains.kotlin:kotlin-stdlib:$libraries.kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-junit:$libraries.kotlin_version"
     testCompile "org.mockito:mockito-core:$libraries.mockito"
     testCompile "org.hamcrest:hamcrest-library:$libraries.hamcrest"
 
