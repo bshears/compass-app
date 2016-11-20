@@ -3,7 +3,7 @@ package mariuszbaleczny.compass
 /**
  * Created by mariusz on 05.11.16.
  */
-class ConstantsK {
+class Constants {
     companion object {
         val Z_AXIS_ROTATION = 0
 

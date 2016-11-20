@@ -12,7 +12,7 @@ import android.widget.Toast
 /**
  * Created by mariusz on 31.10.16.
  */
-class CompassActivityK : AppCompatActivity() {
+class CompassActivity : AppCompatActivity() {
 
     private var toast: Toast? = null
     private var pressBackAgainToExit: Boolean = false
@@ -20,7 +20,7 @@ class CompassActivityK : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compass)
-        showFragment(CompassFragmentK.newInstance(), CompassFragmentK.TAG, false);
+        showFragment(CompassFragment.newInstance(), CompassFragment.TAG, false);
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -41,7 +41,7 @@ class CompassActivityK : AppCompatActivity() {
         }
         pressBackAgainToExit = true
         showToastIfInvisible(R.string.press_again_to_exit_toast)
-        Handler().postDelayed({ pressBackAgainToExit = false }, ConstantsK.ON_BACK_PRESS_DELAY_TIME.toLong())
+        Handler().postDelayed({ pressBackAgainToExit = false }, Constants.ON_BACK_PRESS_DELAY_TIME.toLong())
     }
 
     private fun showFragment(fragment: Fragment, tag: String, addToBackStack: Boolean) {

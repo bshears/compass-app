@@ -19,41 +19,41 @@ import android.widget.TextView
 import com.pawegio.kandroid.d
 import com.pawegio.kandroid.find
 import com.pawegio.kandroid.textWatcher
-import mariuszbaleczny.compass.custom.CustomEditTextK
-import mariuszbaleczny.compass.location.CompassToLocationProviderK
-import mariuszbaleczny.compass.location.LocationHelperK
+import mariuszbaleczny.compass.custom.CustomEditText
+import mariuszbaleczny.compass.location.CompassToLocationProvider
+import mariuszbaleczny.compass.location.LocationHelper
 
 /**
  * Created by mariusz on 03.11.16.
  */
-class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocationListener {
+class CompassFragment : Fragment(), CompassToLocationProvider.CompassToLocationListener {
 
     companion object {
         const val COMPASS_APPLICATION: String = "compass_location_provider"
         const val REQUEST_CODE_SETTINGS: Int = 0
-        val TAG: String = "CompassFragmentK"
+        val TAG: String = "CompassFragment"
 
-        fun newInstance(): CompassFragmentK {
-            return CompassFragmentK()
+        fun newInstance(): CompassFragment {
+            return CompassFragment()
         }
     }
 
-    private var locationHelper: LocationHelperK? = null
-    private var compassLocationProvider: CompassToLocationProviderK? = null
+    private var locationHelper: LocationHelper? = null
+    private var compassLocationProvider: CompassToLocationProvider? = null
 
     private var compassView: CompassRotateHelper? = null
     private var title: TextView? = null
     private var subtitle: TextView? = null
-    private var latitude: CustomEditTextK? = null
-    private var longitude: CustomEditTextK? = null
+    private var latitude: CustomEditText? = null
+    private var longitude: CustomEditText? = null
     private var latitudeLayout: TextInputLayout? = null
     private var longitudeLayout: TextInputLayout? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (UtilsK.isCompassSensorPresent(context)) {
+        if (Utils.isCompassSensorPresent(context)) {
             setupCompassToLocationProvider()
-            locationHelper = LocationHelperK(Location(COMPASS_APPLICATION))
+            locationHelper = LocationHelper(Location(COMPASS_APPLICATION))
         }
     }
 
@@ -103,8 +103,8 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
-            CompassToLocationProviderK.LOC_PERMISSION_ON_START_REQUEST_CODE -> {
-                if (UtilsK.areGranted(grantResults)) {
+            CompassToLocationProvider.LOC_PERMISSION_ON_START_REQUEST_CODE -> {
+                if (Utils.areGranted(grantResults)) {
                     compassLocationProvider?.startIfNotStarted()
                 } else {
                     setCoordinatesEnabled(false)
@@ -114,7 +114,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
     }
 
     private fun setupLayoutOnLocationServicesCheckUp() {
-        if (UtilsK.isLocationServicesEnabled(context)) {
+        if (Utils.isLocationServicesEnabled(context)) {
             setTitle(R.string.needle_free_mode, Color.BLACK)
             compassLocationProvider?.startIfNotStarted()
             setLayoutElementsOnProvider(true)
@@ -155,7 +155,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
         compassLocationProvider?.setTargetLocation(locationHelper?.getLocation())
 
         // incorrect location doesn't mean that input value is incorrect!
-        if (UtilsK.isLatitudeInRange(value)) {
+        if (Utils.isLatitudeInRange(value)) {
             clearLatitudeOutOfRangeError()
         } else {
             setTitle(R.string.needle_free_mode, Color.BLACK)
@@ -177,7 +177,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
         compassLocationProvider?.setTargetLocation(locationHelper?.getLocation())
 
         // incorrect location doesn't mean that input value is incorrect!
-        if (UtilsK.isLongitudeInRange(value)) {
+        if (Utils.isLongitudeInRange(value)) {
             clearLongitudeOutOfError()
         } else {
             setTitle(R.string.needle_free_mode, Color.BLACK)
@@ -223,8 +223,8 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
     private fun setupLayoutWidgets(v: View?) {
         title = v?.find<TextView>(R.id.fragment_compass_title_text_view)
         subtitle = v?.find<TextView>(R.id.fragment_compass_subtitle_text_view)
-        latitude = v?.find<CustomEditTextK>(R.id.fragment_compass_latitude_edit_text)
-        longitude = v?.find<CustomEditTextK>(R.id.fragment_compass_longitude_edit_text)
+        latitude = v?.find<CustomEditText>(R.id.fragment_compass_latitude_edit_text)
+        longitude = v?.find<CustomEditText>(R.id.fragment_compass_longitude_edit_text)
         latitudeLayout = v?.find<TextInputLayout>(R.id.fragment_compass_latitude_text_input)
         longitudeLayout = v?.find<TextInputLayout>(R.id.fragment_compass_longitude_text_input)
     }
@@ -239,20 +239,20 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
     }
 
     private fun requestPermissionsIfNotGranted() {
-        if (!UtilsK.arePermissionsGranted(context, CompassToLocationProviderK.COMPASS_PERMISSIONS)) {
-            ActivityCompat.requestPermissions(context as CompassActivityK,
-                    CompassToLocationProviderK.COMPASS_PERMISSIONS,
-                    CompassToLocationProviderK.LOC_PERMISSION_ON_START_REQUEST_CODE)
+        if (!Utils.arePermissionsGranted(context, CompassToLocationProvider.COMPASS_PERMISSIONS)) {
+            ActivityCompat.requestPermissions(context as CompassActivity,
+                    CompassToLocationProvider.COMPASS_PERMISSIONS,
+                    CompassToLocationProvider.LOC_PERMISSION_ON_START_REQUEST_CODE)
         }
     }
 
     private fun setupCompassToLocationProvider() {
-        compassLocationProvider = CompassToLocationProviderK(context)
+        compassLocationProvider = CompassToLocationProvider(context)
         compassLocationProvider?.setCompassToLocationListener(this)
     }
 
     private fun setupCoordinateLayouts() {
-        if (UtilsK.isCompassSensorPresent(context)) {
+        if (Utils.isCompassSensorPresent(context)) {
             latitude?.setOnEditorActionListener({ v, id, event -> onCoordinateFieldAction(longitude, v, id) })
             longitude?.setOnEditorActionListener({ v, id, event -> onCoordinateFieldAction(latitude, v, id) })
             latitude?.textWatcher { afterTextChanged { s -> onCoordinateChanged() } }
@@ -260,7 +260,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
         }
     }
 
-    private fun onCoordinateFieldAction(complementaryField: CustomEditTextK?, v: TextView?, actionId: Int): Boolean {
+    private fun onCoordinateFieldAction(complementaryField: CustomEditText?, v: TextView?, actionId: Int): Boolean {
         if (actionId == EditorInfo.IME_ACTION_DONE) {
             controlFocus(complementaryField, v as View)
             return false
@@ -268,9 +268,9 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
         return true
     }
 
-    private fun controlFocus(field: CustomEditTextK?, v: View) {
+    private fun controlFocus(field: CustomEditText?, v: View) {
         if (!(field?.text?.isEmpty() as Boolean)) {
-            UtilsK.hideKeyboard(v, context)
+            Utils.hideKeyboard(v, context)
             v.clearFocus()
         } else {
             field?.requestFocus()
@@ -306,7 +306,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
     }
 
     private fun setupTitleAndSubtitle() {
-        if (!UtilsK.isCompassSensorPresent(context)) {
+        if (!Utils.isCompassSensorPresent(context)) {
             title?.setText(R.string.compass_not_detected_title)
         } else {
             title?.setText(R.string.needle_free_mode)
@@ -323,7 +323,7 @@ class CompassFragmentK : Fragment(), CompassToLocationProviderK.CompassToLocatio
     }
 
     private fun checkUpAndSetupLocationServices() {
-        if (UtilsK.isCompassSensorPresent(activity)) {
+        if (Utils.isCompassSensorPresent(activity)) {
             setupLayoutOnLocationServicesCheckUp()
         }
     }

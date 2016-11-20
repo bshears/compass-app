@@ -1,7 +1,7 @@
 package mariuszbaleczny.compass.test
 
 import mariuszbaleczny.compass.Constants
-import mariuszbaleczny.compass.UtilsK
+import mariuszbaleczny.compass.Utils
 import org.junit.Assert
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -13,50 +13,50 @@ class UtilsTest {
     @Test
     fun testLatitudeValueInRange() {
         val valueInRange = 45.0
-        assertTrue(UtilsK.isLatitudeInRange(valueInRange))
+        assertTrue(Utils.isLatitudeInRange(valueInRange))
     }
 
     @Test
     fun testLatitudeValueOutOfRange() {
         val valueOutOfRange = 100.0
-        assertFalse(UtilsK.isLatitudeInRange(valueOutOfRange))
+        assertFalse(Utils.isLatitudeInRange(valueOutOfRange))
     }
 
     @Test
     fun testLatitudeValueMinimum_ShouldBeInRange() {
-        assertTrue(UtilsK.isLatitudeInRange(Constants.LATITUDE_MIN))
+        assertTrue(Utils.isLatitudeInRange(Constants.LATITUDE_MIN))
     }
 
     @Test
     fun testLatitudeValueMaximum_ShouldBeInRange() {
-        assertTrue(UtilsK.isLatitudeInRange(Constants.LATITUDE_MAX))
+        assertTrue(Utils.isLatitudeInRange(Constants.LATITUDE_MAX))
     }
 
     @Test
     fun shouldBeFalseWhenSetLatitudeDoubleNan() {
-        assertFalse(UtilsK.isLatitudeInRange(java.lang.Double.NaN))
+        assertFalse(Utils.isLatitudeInRange(java.lang.Double.NaN))
     }
 
     @Test
     fun testLongitudeValueInRange() {
         val valueOutOfRange = 100.0
-        assertTrue(UtilsK.isLongitudeInRange(valueOutOfRange))
+        assertTrue(Utils.isLongitudeInRange(valueOutOfRange))
     }
 
     @Test
     fun testLongitudeValueOutOfRange_shouldReturnFalse() {
         val valueOutOfRange = 200.0
-        assertFalse(UtilsK.isLongitudeInRange(valueOutOfRange))
+        assertFalse(Utils.isLongitudeInRange(valueOutOfRange))
     }
 
     @Test
     fun testLongitudeValueMinimum_ShouldBeInRange() {
-        assertTrue(UtilsK.isLongitudeInRange(Constants.LONGITUDE_MIN))
+        assertTrue(Utils.isLongitudeInRange(Constants.LONGITUDE_MIN))
     }
 
     @Test
     fun testLongitudeValueMaximum_ShouldBeInRange() {
-        assertTrue(UtilsK.isLongitudeInRange(Constants.LONGITUDE_MAX))
+        assertTrue(Utils.isLongitudeInRange(Constants.LONGITUDE_MAX))
     }
 
     @Test
@@ -64,14 +64,14 @@ class UtilsTest {
         val valueInRadians = 1f
         val valueInDegrees = Math.toDegrees(valueInRadians.toDouble()).toFloat()
         val valueInDegreesRounded = Math.round(valueInDegrees)
-        assertEquals(UtilsK.convertRadiansToDegreesRounded(valueInRadians), valueInDegreesRounded)
+        assertEquals(Utils.convertRadiansToDegreesRounded(valueInRadians), valueInDegreesRounded)
     }
 
     @Test
     fun testConversionRadiansToDegrees_shouldNotEquals() {
         val valueInRadians = 1f
         val valueInDegrees = Math.toDegrees(valueInRadians.toDouble()).toFloat()
-        Assert.assertNotEquals(UtilsK.convertRadiansToDegreesRounded(valueInRadians), valueInDegrees)
+        Assert.assertNotEquals(Utils.convertRadiansToDegreesRounded(valueInRadians), valueInDegrees)
     }
 
 }

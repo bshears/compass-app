@@ -1,12 +1,12 @@
 package mariuszbaleczny.compass.location
 
 import android.location.Location
-import mariuszbaleczny.compass.UtilsK
+import mariuszbaleczny.compass.Utils
 
 /**
  * Created by mariusz on 05.11.16.
  */
-class LocationHelperK(private val location: Location) {
+class LocationHelper(private val location: Location) {
 
     private var latitude: Double = Double.NaN
     private var longitude: Double = Double.NaN
@@ -28,14 +28,14 @@ class LocationHelperK(private val location: Location) {
 
     fun setLatitude(latitude: Double?) {
         if (latitude != null) {
-            latitudeCorrect = UtilsK.isLatitudeInRange(latitude)
+            latitudeCorrect = Utils.isLatitudeInRange(latitude)
             this.latitude = if (latitudeCorrect) latitude else Double.NaN
         }
     }
 
     fun setLongitude(longitude: Double?) {
         if (longitude != null) {
-            longitudeCorrect = UtilsK.isLongitudeInRange(longitude)
+            longitudeCorrect = Utils.isLongitudeInRange(longitude)
             this.longitude = if (longitudeCorrect) longitude else Double.NaN
         }
     }

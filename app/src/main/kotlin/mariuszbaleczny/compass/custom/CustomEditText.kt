@@ -8,7 +8,7 @@ import android.widget.EditText
 /**
  * Created by mariusz on 05.11.16.
  */
-class CustomEditTextK(context: Context?, attr: AttributeSet?) : EditText(context, attr) {
+class CustomEditText(context: Context?, attr: AttributeSet?) : EditText(context, attr) {
 
     constructor(context: Context?) : this(context, null) {
     }

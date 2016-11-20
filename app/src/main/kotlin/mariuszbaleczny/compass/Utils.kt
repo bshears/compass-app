@@ -11,11 +11,11 @@ import com.pawegio.kandroid.e
 /**
  * Created by mariusz on 05.11.16.
  */
-class UtilsK {
+class Utils {
 
     companion object {
         fun convertRadiansToDegreesRounded(angleInRadians: Float): Int {
-            return Math.round(((Math.toDegrees(angleInRadians.toDouble()) + ConstantsK.FULL_ANGLE) % ConstantsK.FULL_ANGLE).toInt().toFloat())
+            return Math.round(((Math.toDegrees(angleInRadians.toDouble()) + Constants.FULL_ANGLE) % Constants.FULL_ANGLE).toInt().toFloat())
         }
 
         fun isCompassSensorPresent(context: Context): Boolean {
@@ -31,7 +31,7 @@ class UtilsK {
             try {
                 return lm.isProviderEnabled(LocationManager.GPS_PROVIDER) && lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
             } catch (e: Exception) {
-                e(UtilsK.toString(), e.message.toString())
+                e(Utils.toString(), e.message.toString())
                 return false
             }
 
@@ -61,11 +61,11 @@ class UtilsK {
         }
 
         fun isLatitudeInRange(value: Double): Boolean {
-            return value >= ConstantsK.LATITUDE_MIN && value <= ConstantsK.LATITUDE_MAX
+            return value >= Constants.LATITUDE_MIN && value <= Constants.LATITUDE_MAX
         }
 
         fun isLongitudeInRange(value: Double): Boolean {
-            return value >= ConstantsK.LONGITUDE_MIN && value <= ConstantsK.LONGITUDE_MAX
+            return value >= Constants.LONGITUDE_MIN && value <= Constants.LONGITUDE_MAX
         }
     }
 
