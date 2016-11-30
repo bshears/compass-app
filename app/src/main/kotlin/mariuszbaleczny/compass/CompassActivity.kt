@@ -8,11 +8,17 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import mariuszbaleczny.compass.dagger.DaggerCompassComponent
+import mariuszbaleczny.compass.mvp.CompassMvp
+import javax.inject.Inject
 
 /**
  * Created by mariusz on 31.10.16.
  */
 class CompassActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var compassView: CompassMvp.View
 
     private var toast: Toast? = null
     private var pressBackAgainToExit: Boolean = false
@@ -20,7 +26,8 @@ class CompassActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compass)
-        showFragment(CompassFragment.newInstance(), CompassFragment.TAG, false);
+        DaggerCompassComponent.builder().build().inject(this)
+        showFragment(compassView.asFragment(), CompassFragment.TAG, false)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

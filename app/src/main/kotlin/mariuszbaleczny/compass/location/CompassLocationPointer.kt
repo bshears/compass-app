@@ -15,13 +15,13 @@ import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import com.pawegio.kandroid.d
 import mariuszbaleczny.compass.Constants
-import mariuszbaleczny.compass.R
 import mariuszbaleczny.compass.Utils
+import mariuszbaleczny.compass.location.CompassPointer.CompassToLocationListener
 
 /**
  * Created by mariusz on 05.11.16.
  */
-class CompassToLocationProvider(private val context: Context) : SensorEventListener, LocationListener {
+class CompassLocationPointer(private val context: Context) : CompassPointer, SensorEventListener, LocationListener {
 
     companion object {
         val LOC_PERMISSION_ON_START_REQUEST_CODE = 100
@@ -44,7 +44,7 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
 
     private var targetLocation: Location? = null
     private var geomagneticField: GeomagneticField? = null
-    private var compassToLocationListener: CompassToLocationListener? = null
+    private var listener: CompassToLocationListener? = null
 
     init {
         sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -68,17 +68,12 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
 
     override fun onProviderEnabled(provider: String) {
         d(toString(), provider + " : Location Services ON")
-        if (provider.contains(context.getString(R.string.gps_provider)) || provider.contains(context.getString(R.string.network_provider))) {
-            compassToLocationListener?.setLayoutElementsOnProvider(true)
-        }
+        listener?.onProviderEnabled(provider)
     }
 
     override fun onProviderDisabled(provider: String) {
         d(toString(), provider + " : Location Services OFF")
-        if (provider.contains(context.getString(R.string.gps_provider)) || provider.contains(context.getString(R.string.network_provider))) {
-            compassToLocationListener?.setLayoutElementsOnProvider(false)
-            setTargetLocation(null)
-        }
+        listener?.onProviderDisabled(provider)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -92,18 +87,18 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
         updateAngle()
     }
 
-    fun setTargetLocation(location: Location?) {
+    override fun setTargetLocation(location: Location?) {
         targetLocation = location
     }
 
-    fun setCompassToLocationListener(listener: CompassToLocationListener) {
-        compassToLocationListener = listener
+    override fun setListener(listener: CompassToLocationListener) {
+        this.listener = listener
     }
 
     private fun updateAngle() {
         calculateTrueNorthAngleIfPossible()
         calculateLocationAngleIfPossible()
-        compassToLocationListener?.onCompassPointerRotate(northAngle, targetLocationAngle)
+        listener?.onCompassPointerRotate(northAngle, targetLocationAngle)
     }
 
     private fun calculateTrueNorthAngleIfPossible() {
@@ -115,13 +110,13 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
     private fun calculateLocationAngleIfPossible() {
         if (targetLocation != null) {
             val bearing = myLocation.bearingTo(targetLocation).toInt()
-            targetLocationAngle = northAngle.toInt() - bearing.toInt()
+            targetLocationAngle = northAngle - bearing
         } else {
             targetLocationAngle = 0
         }
     }
 
-    fun startIfNotStarted() {
+    override fun startIfNotStarted() {
         if (!providerStarted) {
             sensorManager.registerListener(this, sensor, SensorManager.SENSOR_DELAY_GAME)
             providerStarted = true
@@ -133,15 +128,18 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
 
             for (provider in locationManager.getProviders(true)) {
                 if (LocationManager.GPS_PROVIDER == provider || LocationManager.NETWORK_PROVIDER == provider) {
-                    myLocation = locationManager.getLastKnownLocation(provider)
+                    if (locationManager.getLastKnownLocation(provider) != null) {
+                        myLocation = locationManager.getLastKnownLocation(provider)
+                    }
                     locationManager.requestLocationUpdates(provider, Constants.MIN_UPDATE_INTERVAL_MS,
                             Constants.MIN_DISTANCE_UPDATE_IN_METERS, this)
+                    onProviderEnabled(provider)
                 }
             }
         }
     }
 
-    fun stopIfStarted() {
+    override fun stopIfStarted() {
         if (providerStarted) {
             sensorManager.unregisterListener(this, sensor)
             providerStarted = false
@@ -151,12 +149,6 @@ class CompassToLocationProvider(private val context: Context) : SensorEventListe
             }
             locationManager.removeUpdates(this)
         }
-    }
-
-    interface CompassToLocationListener {
-        fun onCompassPointerRotate(roseAngle: Int, needleAngle: Int)
-
-        fun setLayoutElementsOnProvider(enabled: Boolean)
     }
 
 }
