@@ -29,7 +29,7 @@ import mariuszbaleczny.compass.mvp.CompassPresenter
 /**
  * Created by mariusz on 03.11.16.
  */
-class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationListener*/ CompassMvp.View {
+class CompassFragment : Fragment(), CompassMvp.View {
     companion object {
         const val COMPASS_APPLICATION: String = "compass_location_provider"
         const val REQUEST_CODE_SETTINGS: Int = 0
@@ -38,7 +38,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
     }
 
     private var presenter: CompassMvp.Presenter? = null
-    //    private var locationHelper: LocationHelper? = null
     private var compassPointer: CompassLocationPointer? = null
 
     private var compassView: CompassRotateHelper? = null
@@ -66,14 +65,9 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
             }
 
         })
-
-//        if (Utils.isCompassSensorPresent(context)) {
-//            setupCompassToLocationProvider()
-//            locationHelper = LocationHelper(Location(COMPASS_APPLICATION))
-//        }
     }
 
-    private fun onPresenterLoad(presenter: CompassPresenter) {
+    override fun onPresenterLoad(presenter: CompassPresenter) {
         this.presenter = presenter
         this.presenter?.bindView(this)
         if (compassPointer == null) compassPointer = CompassLocationPointer(context)
@@ -88,7 +82,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
         setupCompassView(v)
         setupCoordinateLayouts()
         setCoordinateInputDisabled()
-//        setCoordinatesEnabled(false)
         return v
     }
 
@@ -99,8 +92,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
     override fun onResume() {
         super.onResume()
         setupLayoutOnLocationServicesCheckUp()
-//        compassPointer?.startIfNotStarted()
-//        checkUpAndSetupLocationServices()
     }
 
     override fun onPause() {
@@ -136,25 +127,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
         compassView?.rotateNeedle(needleAngle)
     }
 
-    /*override fun onCompassPointerRotate(roseAngle: Int, needleAngle: Int) {
-        compassView?.rotateRose(roseAngle)
-        compassView?.rotateNeedle(needleAngle)
-    }
-
-    override fun setLayoutElementsOnProvider(enabled: Boolean) {
-        setCoordinatesEnabled(enabled)
-        if (enabled) {
-            setSubtitle(R.string.info_text_subtitle, null)
-            if (locationHelper?.isCorrect() as Boolean) {
-                compassPointer?.setTargetLocation(locationHelper?.getLocation())
-                setTitle(R.string.point_location_title, Color.BLACK)
-            }
-        } else {
-            setTitle(R.string.needle_free_mode, Color.BLACK)
-            setSubtitle(R.string.touch_info_error_subtitle, View.OnClickListener { setupLayoutOnLocationServicesCheckUp() })
-        }
-    }*/
-
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         when (requestCode) {
             CompassLocationPointer.LOC_PERMISSION_ON_START_REQUEST_CODE -> {
@@ -165,6 +137,36 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
                 }
             }
         }
+    }
+
+    override fun onLatitudeInRange() {
+        latitudeLayout?.error = null
+        latitudeLayout?.isErrorEnabled = false
+    }
+
+    override fun onLatitudeOutOfRange() {
+        latitudeLayout?.error = getString(R.string.error_latitude_out_of_range)
+    }
+
+    override fun onLongitudeInRange() {
+        longitudeLayout?.error = null
+        longitudeLayout?.isErrorEnabled = false
+    }
+
+    override fun onLongitudeOutOfRange() {
+        longitudeLayout?.error = getString(R.string.error_longitude_out_of_range)
+    }
+
+    override fun onNullLatitude() {
+        latitudeLayout?.error = null
+        latitudeLayout?.isErrorEnabled = false
+        setTitle(R.string.needle_free_mode)
+    }
+
+    override fun onNullLongitude() {
+        latitudeLayout?.error = null
+        latitudeLayout?.isErrorEnabled = false
+        setTitle(R.string.needle_free_mode)
     }
 
     private fun setupLayoutOnLocationServicesCheckUp() {
@@ -194,110 +196,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
                         })
                 .setNegativeButton(R.string.negative_alert_dialog, null)
                 .show()
-    }
-
-//    private fun onLatitudeChanged(value: Double?) {
-//        if (value == null) {
-//            locationHelper?.setIncorrect()
-//            changeUiOnInvalidLatitude()
-//            resetNeedlePosition()
-//            return
-//        }
-//
-//        locationHelper?.setLatitude(value)
-//
-//        // even when coordinate is out its of range, then target location will be set to null (reset)
-//        compassPointer?.setTargetLocation(locationHelper?.getLocation())
-//
-//        // incorrect location doesn't mean that input value is incorrect!
-//        if (Utils.isLatitudeInRange(value)) {
-//            clearLatitudeOutOfRangeError()
-//        } else {
-//            setTitle(R.string.needle_free_mode, Color.BLACK)
-//            setLatitudeOutOfRangeError()
-//        }
-//    }
-
-    override fun onLatitudeInRange() {
-        latitudeLayout?.error = null
-        latitudeLayout?.isErrorEnabled = false
-    }
-
-    override fun onLatitudeOutOfRange() {
-        latitudeLayout?.error = getString(R.string.error_latitude_out_of_range)
-    }
-
-    override fun onLongitudeInRange() {
-        longitudeLayout?.error = null
-        longitudeLayout?.isErrorEnabled = false
-    }
-
-    override fun onLongitudeOutOfRange() {
-        longitudeLayout?.error = getString(R.string.error_longitude_out_of_range)
-    }
-
-//    private fun onLongitudeChanged(value: Double?) {
-//        if (value == null) {
-//            locationHelper?.setIncorrect()
-//            changeUiOnInvalidLongitude()
-//            resetNeedlePosition()
-//            return
-//        }
-//
-//        locationHelper?.setLongitude(value)
-//
-//        // even when coordinate is out its of range, then target location will be set to null (reset)
-//        compassPointer?.setTargetLocation(locationHelper?.getLocation())
-//
-//        // incorrect location doesn't mean that input value is incorrect!
-//        if (Utils.isLongitudeInRange(value)) {
-//            clearLongitudeOutOfError()
-//        } else {
-//            setTitle(R.string.needle_free_mode, Color.BLACK)
-//            setLongitudeOutOfRangeError()
-//        }
-//    }
-
-//    private fun changeUiOnInvalidLongitude() {
-//        clearLongitudeOutOfError()
-//        setTitle(R.string.needle_free_mode, Color.BLACK)
-//    }
-
-//    private fun clearLongitudeOutOfError() {
-//        longitudeLayout?.error = null
-//        longitudeLayout?.isErrorEnabled = false
-//    }
-//
-//    private fun resetNeedlePosition() {
-//        // set null location, so needle will reset its state
-//        compassPointer?.setTargetLocation(null)
-//    }
-//
-//    private fun changeUiOnInvalidLatitude() {
-//        clearLatitudeOutOfRangeError()
-//        setTitle(R.string.needle_free_mode, Color.BLACK)
-//    }
-
-//    private fun clearLatitudeOutOfRangeError() {
-//        latitudeLayout?.error = null
-//        latitudeLayout?.isErrorEnabled = false
-//    }
-
-    override fun onNullLatitude() {
-        latitudeLayout?.error = null
-        latitudeLayout?.isErrorEnabled = false
-        setTitle(R.string.needle_free_mode, Color.BLACK)
-    }
-
-    override fun onNullLongitude() {
-        latitudeLayout?.error = null
-        latitudeLayout?.isErrorEnabled = false
-        setTitle(R.string.needle_free_mode, Color.BLACK)
-    }
-
-    private fun setTitle(resId: Int, color: Int) {
-        title?.setText(resId)
-        title?.setTextColor(color)
     }
 
     private fun setSubtitle(resId: Int, listener: View.OnClickListener?) {
@@ -331,11 +229,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
         }
     }
 
-//    private fun setupCompassToLocationProvider() {
-//        compassPointer = CompassLocationPointer(context)
-//        compassPointer?.setCompassToLocationListener(this)
-//    }
-
     private fun setupCoordinateLayouts() {
         if (Utils.isCompassSensorPresent(context)) {
             latitude?.setOnEditorActionListener({ v, id, event -> onCoordinateFieldAction(longitude, v, id) })
@@ -362,20 +255,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
         }
     }
 
-//    private fun onCoordinateChanged() {
-//        val latitude: Double? = parseDouble(this.latitude?.text)
-//        val longitude: Double? = parseDouble(this.longitude?.text)
-//
-//        onLatitudeChanged(latitude)
-//        onLongitudeChanged(longitude)
-//
-//        if (locationHelper?.isCorrect() as Boolean) {
-//            setTitle(R.string.point_location_title, Color.BLACK)
-//            clearLatitudeOutOfRangeError()
-//            clearLongitudeOutOfError()
-//        }
-//    }
-
     private fun parseDouble(s: Editable?): Double? {
         try {
             return s.toString().toDouble()
@@ -384,11 +263,6 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
             return null
         }
     }
-//
-//    private fun setCoordinatesEnabled(enabled: Boolean) {
-//        latitude?.isEnabled = enabled
-//        longitude?.isEnabled = enabled
-//    }
 
     private fun setupTitleAndSubtitle() {
         if (!Utils.isCompassSensorPresent(context)) {
@@ -399,19 +273,5 @@ class CompassFragment : Fragment(), /*CompassLocationPointer.CompassToLocationLi
             subtitle?.setText(R.string.info_text_subtitle)
         }
     }
-
-//    private fun setLatitudeOutOfRangeError() {
-//        latitudeLayout?.error = getString(R.string.error_latitude_out_of_range)
-//    }
-
-//    private fun setLongitudeOutOfRangeError() {
-//        longitudeLayout?.error = getString(R.string.error_longitude_out_of_range)
-//    }
-
-//    private fun checkUpAndSetupLocationServices() {
-//        if (Utils.isCompassSensorPresent(activity)) {
-//            setupLayoutOnLocationServicesCheckUp()
-//        }
-//    }
 
 }
