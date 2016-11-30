@@ -1,8 +1,8 @@
 package mariuszbaleczny.compass.dagger
 
 import dagger.Component
-import mariuszbaleczny.compass.CompassActivity
 import mariuszbaleczny.compass.mvp.CompassMvp
+import mariuszbaleczny.compass.ui.activity.CompassActivity
 import javax.inject.Singleton
 
 /**

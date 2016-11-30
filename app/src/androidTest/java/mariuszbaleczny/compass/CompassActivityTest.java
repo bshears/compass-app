@@ -12,7 +12,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import mariuszbaleczny.compass.custom.CustomEditText;
+import mariuszbaleczny.compass.ui.activity.CompassActivity;
+import mariuszbaleczny.compass.ui.custom.CustomEditText;
 
 import static android.support.test.InstrumentationRegistry.getInstrumentation;
 import static junit.framework.Assert.assertEquals;

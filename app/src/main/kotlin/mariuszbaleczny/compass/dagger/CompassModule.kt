@@ -2,9 +2,9 @@ package mariuszbaleczny.compass.dagger
 
 import dagger.Module
 import dagger.Provides
-import mariuszbaleczny.compass.CompassFragment
 import mariuszbaleczny.compass.mvp.CompassMvp
 import mariuszbaleczny.compass.mvp.CompassPresenter
+import mariuszbaleczny.compass.ui.fragment.CompassFragment
 import javax.inject.Singleton
 
 /**

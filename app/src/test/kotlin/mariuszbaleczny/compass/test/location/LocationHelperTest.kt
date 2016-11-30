@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.test
+package mariuszbaleczny.compass.test.location
 
 import android.location.Location
 import mariuszbaleczny.compass.location.LocationHelper

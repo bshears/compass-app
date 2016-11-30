@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass
+package mariuszbaleczny.compass.ui.helper
 
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator

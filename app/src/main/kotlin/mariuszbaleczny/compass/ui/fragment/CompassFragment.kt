@@ -1,7 +1,6 @@
-package mariuszbaleczny.compass
+package mariuszbaleczny.compass.ui.fragment
 
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.provider.Settings
 import android.support.annotation.StringRes
@@ -10,10 +9,11 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.app.Fragment
 import android.support.v4.app.LoaderManager.LoaderCallbacks
 import android.support.v4.content.Loader
-import android.support.v7.app.AlertDialog
+import android.support.v7.app.AlertDialog.Builder
 import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.ImageView
@@ -21,10 +21,19 @@ import android.widget.TextView
 import com.pawegio.kandroid.d
 import com.pawegio.kandroid.find
 import com.pawegio.kandroid.textWatcher
-import mariuszbaleczny.compass.custom.CustomEditText
+import mariuszbaleczny.compass.R
+import mariuszbaleczny.compass.R.layout
+import mariuszbaleczny.compass.R.string
+import mariuszbaleczny.compass.R.style
+import mariuszbaleczny.compass.Utils
+import mariuszbaleczny.compass.loader.CompassPresenterLoader
 import mariuszbaleczny.compass.location.CompassLocationPointer
 import mariuszbaleczny.compass.mvp.CompassMvp
+import mariuszbaleczny.compass.mvp.CompassMvp.Presenter
 import mariuszbaleczny.compass.mvp.CompassPresenter
+import mariuszbaleczny.compass.ui.activity.CompassActivity
+import mariuszbaleczny.compass.ui.custom.CustomEditText
+import mariuszbaleczny.compass.ui.helper.CompassRotateHelper
 
 /**
  * Created by mariusz on 03.11.16.
@@ -37,7 +46,7 @@ class CompassFragment : Fragment(), CompassMvp.View {
         val TAG: String = "CompassFragment"
     }
 
-    private var presenter: CompassMvp.Presenter? = null
+    private var presenter: Presenter? = null
     private var compassPointer: CompassLocationPointer? = null
 
     private var compassView: CompassRotateHelper? = null
@@ -51,16 +60,16 @@ class CompassFragment : Fragment(), CompassMvp.View {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        loaderManager.initLoader(COMPASS_LOADER_ID, savedInstanceState, object : LoaderCallbacks<CompassMvp.Presenter> {
-            override fun onLoadFinished(loader: Loader<CompassMvp.Presenter>?, data: CompassMvp.Presenter?) {
+        loaderManager.initLoader(COMPASS_LOADER_ID, savedInstanceState, object : LoaderCallbacks<Presenter> {
+            override fun onLoadFinished(loader: Loader<Presenter>?, data: Presenter?) {
                 onPresenterLoad(data!! as CompassPresenter)
             }
 
-            override fun onCreateLoader(id: Int, args: Bundle?): Loader<CompassMvp.Presenter> {
+            override fun onCreateLoader(id: Int, args: Bundle?): Loader<Presenter> {
                 return CompassPresenterLoader(context)
             }
 
-            override fun onLoaderReset(loader: Loader<CompassMvp.Presenter>?) {
+            override fun onLoaderReset(loader: Loader<Presenter>?) {
                 presenter = null
             }
 
@@ -76,7 +85,7 @@ class CompassFragment : Fragment(), CompassMvp.View {
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val v: View? = inflater?.inflate(R.layout.fragment_compass, container, false)
+        val v: View? = inflater?.inflate(layout.fragment_compass, container, false)
         setupLayoutWidgets(v)
         setupTitleAndSubtitle()
         setupCompassView(v)
@@ -145,7 +154,7 @@ class CompassFragment : Fragment(), CompassMvp.View {
     }
 
     override fun onLatitudeOutOfRange() {
-        latitudeLayout?.error = getString(R.string.error_latitude_out_of_range)
+        latitudeLayout?.error = getString(string.error_latitude_out_of_range)
     }
 
     override fun onLongitudeInRange() {
@@ -154,29 +163,29 @@ class CompassFragment : Fragment(), CompassMvp.View {
     }
 
     override fun onLongitudeOutOfRange() {
-        longitudeLayout?.error = getString(R.string.error_longitude_out_of_range)
+        longitudeLayout?.error = getString(string.error_longitude_out_of_range)
     }
 
     override fun onNullLatitude() {
         latitudeLayout?.error = null
         latitudeLayout?.isErrorEnabled = false
-        setTitle(R.string.needle_free_mode)
+        setTitle(string.needle_free_mode)
     }
 
     override fun onNullLongitude() {
         latitudeLayout?.error = null
         latitudeLayout?.isErrorEnabled = false
-        setTitle(R.string.needle_free_mode)
+        setTitle(string.needle_free_mode)
     }
 
     private fun setupLayoutOnLocationServicesCheckUp() {
         if (Utils.isLocationServicesEnabled(context)) {
-            setTitle(R.string.needle_free_mode)
+            setTitle(string.needle_free_mode)
             compassPointer?.startIfNotStarted()
         } else {
-            setTitle(R.string.empty)
-            setSubtitle(R.string.touch_info_error_subtitle,
-                    View.OnClickListener { setupLayoutOnLocationServicesCheckUp() })
+            setTitle(string.empty)
+            setSubtitle(string.touch_info_error_subtitle,
+                    OnClickListener { setupLayoutOnLocationServicesCheckUp() })
             compassPointer?.stopIfStarted()
             setCoordinateInputDisabled()
             buildAndShowLocationServicesDialog()
@@ -184,21 +193,21 @@ class CompassFragment : Fragment(), CompassMvp.View {
     }
 
     private fun buildAndShowLocationServicesDialog() {
-        val builder: AlertDialog.Builder = AlertDialog.Builder(context, R.style.AlertDialogTheme)
-        builder.setTitle(R.string.title_alert_dialog)
-                .setMessage(R.string.message_alert_dialog)
-                .setPositiveButton(R.string.positive_alert_dialog,
+        val builder: Builder = Builder(context, style.AlertDialogTheme)
+        builder.setTitle(string.title_alert_dialog)
+                .setMessage(string.message_alert_dialog)
+                .setPositiveButton(string.positive_alert_dialog,
                         { dialogInterface, i ->
                             startActivityForResult(
                                     Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS),
                                     REQUEST_CODE_SETTINGS
                             )
                         })
-                .setNegativeButton(R.string.negative_alert_dialog, null)
+                .setNegativeButton(string.negative_alert_dialog, null)
                 .show()
     }
 
-    private fun setSubtitle(resId: Int, listener: View.OnClickListener?) {
+    private fun setSubtitle(resId: Int, listener: OnClickListener?) {
         subtitle?.setText(resId)
         subtitle?.setOnClickListener(listener)
     }
@@ -266,11 +275,11 @@ class CompassFragment : Fragment(), CompassMvp.View {
 
     private fun setupTitleAndSubtitle() {
         if (!Utils.isCompassSensorPresent(context)) {
-            title?.setText(R.string.compass_not_detected_title)
-            subtitle?.setText(R.string.empty)
+            title?.setText(string.compass_not_detected_title)
+            subtitle?.setText(string.empty)
         } else {
-            title?.setText(R.string.needle_free_mode)
-            subtitle?.setText(R.string.info_text_subtitle)
+            title?.setText(string.needle_free_mode)
+            subtitle?.setText(string.info_text_subtitle)
         }
     }
 

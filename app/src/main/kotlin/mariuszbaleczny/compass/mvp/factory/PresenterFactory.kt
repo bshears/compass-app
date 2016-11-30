@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.base
+package mariuszbaleczny.compass.mvp.factory
 
 import mariuszbaleczny.compass.mvp.BasePresenter
 

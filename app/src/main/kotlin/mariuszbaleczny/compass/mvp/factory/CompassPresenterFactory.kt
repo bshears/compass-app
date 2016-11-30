@@ -1,6 +1,6 @@
-package mariuszbaleczny.compass.mvp
+package mariuszbaleczny.compass.mvp.factory
 
-import mariuszbaleczny.compass.base.PresenterFactory
+import mariuszbaleczny.compass.mvp.CompassPresenter
 
 /**
  * Created by mariusz on 25.11.16.

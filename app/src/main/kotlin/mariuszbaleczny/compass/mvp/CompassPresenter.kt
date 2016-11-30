@@ -3,12 +3,12 @@ package mariuszbaleczny.compass.mvp
 import android.location.Location
 import android.location.LocationManager.GPS_PROVIDER
 import android.location.LocationManager.NETWORK_PROVIDER
-import mariuszbaleczny.compass.CompassFragment.Companion.COMPASS_APPLICATION
 import mariuszbaleczny.compass.R
 import mariuszbaleczny.compass.location.CompassPointer
 import mariuszbaleczny.compass.location.CoordinateValidator
 import mariuszbaleczny.compass.location.LocationHelper
 import mariuszbaleczny.compass.mvp.CompassMvp.View
+import mariuszbaleczny.compass.ui.fragment.CompassFragment.Companion.COMPASS_APPLICATION
 import java.util.HashMap
 
 /**

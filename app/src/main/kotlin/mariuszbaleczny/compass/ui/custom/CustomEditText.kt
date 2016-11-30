@@ -1,4 +1,4 @@
-package mariuszbaleczny.compass.custom
+package mariuszbaleczny.compass.ui.custom
 
 import android.content.Context
 import android.util.AttributeSet
