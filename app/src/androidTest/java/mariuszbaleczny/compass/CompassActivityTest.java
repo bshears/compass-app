@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,8 @@ import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
+@Deprecated
+@Ignore
 public class CompassActivityTest extends ActivityTestRule<CompassActivity> {
 
     @Rule
@@ -96,19 +99,25 @@ public class CompassActivityTest extends ActivityTestRule<CompassActivity> {
 
     @Test
     public void testTitleOnCorrectInput() {
-//        compassActivity.runOnUiThread(() -> {
-//            latitudeEditText.setText("52");
-//            longitudeEditText.setText("17");
-//        });
+        compassActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                latitudeEditText.setText("52");
+                longitudeEditText.setText("17");
+            }
+        });
         instrumentation.waitForIdleSync();
         assertEquals(compassActivity.getString(R.string.point_location_title), titleTextView.getText().toString());
     }
 
     public void testTitleOnIncorrectInput() {
-//        compassActivity.runOnUiThread(() -> {
-//            latitudeEditText.setText("52");
-//            longitudeEditText.setText("");
-//        });
+        compassActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                latitudeEditText.setText("52");
+                longitudeEditText.setText("");
+            }
+        });
         instrumentation.waitForIdleSync();
         assertEquals(compassActivity.getString(R.string.needle_free_mode), titleTextView.getText().toString());
     }
