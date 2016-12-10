@@ -63,20 +63,22 @@ class CompassLocationPointer(private val context: Context) : CompassPointer, Sen
     }
 
     override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+        d(toString(), provider + ", status " + status)
         // TODO: implement actions
     }
 
     override fun onProviderEnabled(provider: String) {
-        d(toString(), provider + " : Location Services ON")
+        d(toString(), "Provider enabled: " + provider)
         listener?.onProviderEnabled(provider)
     }
 
     override fun onProviderDisabled(provider: String) {
-        d(toString(), provider + " : Location Services OFF")
+        d(toString(), "Provider disabled: " + provider)
         listener?.onProviderDisabled(provider)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+        d(toString(), "Provider " + sensor.name + ", onAccuracyChanged: " + accuracy)
         // TODO: implement actions
     }
 
