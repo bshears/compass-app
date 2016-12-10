@@ -25,6 +25,7 @@ interface CompassMvp {
         fun onLongitudeOutOfRange()
         fun asFragment(): Fragment
         fun onPresenterLoad(presenter: CompassPresenter)
+        fun locationServicesCheckUp()
     }
 
     interface Presenter : CompassToLocationListener, BasePresenter {

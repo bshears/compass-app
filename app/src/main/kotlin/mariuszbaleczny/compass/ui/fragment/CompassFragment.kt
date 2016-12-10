@@ -100,7 +100,7 @@ class CompassFragment : Fragment(), CompassMvp.View {
 
     override fun onResume() {
         super.onResume()
-        setupLayoutOnLocationServicesCheckUp()
+        locationServicesCheckUp()
     }
 
     override fun onPause() {
@@ -178,14 +178,14 @@ class CompassFragment : Fragment(), CompassMvp.View {
         setTitle(string.needle_free_mode)
     }
 
-    private fun setupLayoutOnLocationServicesCheckUp() {
+    override fun locationServicesCheckUp() {
         if (Utils.isLocationServicesEnabled(context)) {
             setTitle(string.needle_free_mode)
             compassPointer?.startIfNotStarted()
         } else {
             setTitle(string.empty)
             setSubtitle(string.touch_info_error_subtitle,
-                    OnClickListener { setupLayoutOnLocationServicesCheckUp() })
+                    OnClickListener { locationServicesCheckUp() })
             compassPointer?.stopIfStarted()
             setCoordinateInputDisabled()
             buildAndShowLocationServicesDialog()

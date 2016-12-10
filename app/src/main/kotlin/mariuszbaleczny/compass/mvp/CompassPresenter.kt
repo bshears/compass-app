@@ -132,6 +132,7 @@ class CompassPresenter : CompassMvp.Presenter {
         view?.setCoordinateInputDisabled()
         view?.setTitle(R.string.needle_free_mode)
         view?.setSubtitle(R.string.touch_info_error_subtitle)
+        view?.locationServicesCheckUp()
     }
 
 }
